@@ -3,7 +3,7 @@
 import sys
 
 def main():
-    print("Travail en cour ...")
+    print("Travail en cours ...")
 
 
 if __name__ == '__main__':
