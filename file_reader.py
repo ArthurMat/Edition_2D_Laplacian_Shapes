@@ -62,7 +62,7 @@ def to_dict(path):
                     x, i = read_float(ligne, i)
                     y, i = read_float(ligne, i)
                     dico_points[key] = [x, y]
-                elif nb_point + 1 < cptr <= nb_point * 2:
+                elif nb_point + 1 < cptr <= nb_point * 2 + 1:
                     i = 0
                     key, i = read_int(ligne, i)
                     x, i = read_int(ligne, i)
@@ -70,6 +70,4 @@ def to_dict(path):
                     dico_seg[key] = [x, y]
                 cptr += 1
     return dico_points, dico_seg
-        
-
             
