@@ -14,4 +14,11 @@ def find_nearest(points, pos):
             neighbor = value
             dist_min = dist
     return neighbor
+
+def inside(points, pos, pos2):
+    liste = []
+    for key, value in points.items():
+        if min(pos[0], pos2[0]) < value[0] < max(pos[0], pos2[0]) and min(pos[1], pos2[1]) < value[1] < max(pos[1], pos2[1]):
+            liste.append(value)
+    return liste
     

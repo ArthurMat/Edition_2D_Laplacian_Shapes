@@ -16,7 +16,15 @@ def draw_circle(screen, points, seg, pos):
     pygame.draw.circle(screen, color=(255, 0, 0), center=cercle, radius=5)
 
 def select(screen, points, seg, pos, pos2):
-    liste = inside(points) #check si points dans selection sinon draw circle si oui recupe les point et circle sur tous
+    liste = inside(points, pos, pos2)
+    if len(liste) == 0:
+        draw_circle(screen, points, seg, pos)
+    else:
+        screen.fill((255, 255, 255))
+        draw_poly(screen, points, seg)
+        for elmt in liste:
+            pygame.draw.circle(screen, color=(0, 0, 255), center=elmt, radius=5)
+
 
 def main_interface(points, seg, WIDTH=1000, HEIGHT=1000):
     pygame.init()
