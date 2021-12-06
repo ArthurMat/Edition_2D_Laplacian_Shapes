@@ -70,6 +70,6 @@ def main_interface(points, seg, WIDTH=1000, HEIGHT=1000):
         if mousedrag:
             update(screen, points, seg, liste_cerlces)
             mouseRectCorners = [pos, [pos[0], actu_pos[1]], actu_pos, [actu_pos[0], pos[1]]]
-            pygame.draw.lines(screen, color=(255, 0, 0), closed=True, points=mouseRectCorners, width=3)
+            pygame.draw.lines(screen, color=(255, 0, 0), closed=True, points=mouseRectCorners, width=1)
         
         pygame.display.update()

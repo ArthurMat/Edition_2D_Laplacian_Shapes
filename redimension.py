@@ -32,7 +32,7 @@ def redimension(points, WIDTH, HEIGHT):
         add_Y = True
         mini_Y = abs(mini_Y)
         maxi_Y += mini_Y
-    ratio = min(WIDTH, HEIGHT) / max(maxi_X, maxi_Y)
+    ratio = min(WIDTH, HEIGHT) / max(maxi_X, maxi_Y) # modifier ration *0.9 pour laisser une marge et onc modifier aussi to_pygame
     for key in points:
         if add_X:
             points[key][0] += mini_X

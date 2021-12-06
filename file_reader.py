@@ -43,9 +43,9 @@ def first_line(ligne):
 def to_dict(path):
     if path[-5:] != ".poly":
         raise ValueError("Given file has not the good extention (.poly)")
-    prem_ligne = False
+    prem_ligne, seg_line = False, False
+    nb_point, nb_seg = 0, 0
     cptr = 1
-    nb_point = 0
     dico_points = dict()
     dico_seg = dict()
     with open(path, "r") as fichier:
@@ -56,18 +56,24 @@ def to_dict(path):
                 prem_ligne = True
                 nb_point = first_line(ligne)
             else:
-                if cptr <= nb_point:
+                if cptr <= nb_point and not seg_line:
                     i = 0
                     key, i = read_int(ligne, i)
                     x, i = read_float(ligne, i)
                     y, i = read_float(ligne, i)
                     dico_points[key] = [x, y]
-                elif nb_point + 1 < cptr <= nb_point * 2 + 1:
+                elif cptr <= nb_seg and seg_line:
                     i = 0
                     key, i = read_int(ligne, i)
                     x, i = read_int(ligne, i)
                     y, i = read_int(ligne, i)
                     dico_seg[key] = [x, y]
+                elif prem_ligne and not seg_line:
+                    seg_line = True
+                    i = 0
+                    cptr = 0
+                    nb_seg, i = read_int(ligne, i)
+                    print(nb_seg)
                 cptr += 1
     return dico_points, dico_seg
             

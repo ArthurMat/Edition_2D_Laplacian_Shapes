@@ -9,6 +9,8 @@ from interface import *
 
 def main():
     points, seg = to_dict(sys.argv[1])
+    # print(points, end='\n\n')
+    # print(seg)
     main_interface(points, seg)
 
 
