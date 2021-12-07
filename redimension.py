@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
 
-def to_pygame(points, HEIGHT):
+def to_pygame(points, WIDTH, HEIGHT):
+    mini_X, maxi_X, mini_Y, maxi_Y = min_max(points)
     for key in points:
-        points[key][1] =  0.9 * HEIGHT - points[key][1]
+        points[key][1] =  maxi_Y - points[key][1]
     return points
 
-def rescale(points, WIDTH, HEIGHT, mini_X, maxi_Y):
+def recenter(points, WIDTH, HEIGHT):
+    mini_X, maxi_X, mini_Y, maxi_Y = min_max(points)
+    dx = maxi_X - mini_X
+    dy = maxi_Y - mini_Y
+    pos_min_X = ((WIDTH - dx) / 2) - mini_X
+    pos_min_Y = ((HEIGHT - dy) / 2) - mini_Y
     for key in points:
-        points[key][1] += (0.9 * HEIGHT - maxi_Y) / 2
-        points[key][0] -= (mini_X - 0.1 * WIDTH) / 2
+        points[key][0] += pos_min_X
+        points[key][1] += pos_min_Y + 0.05 * HEIGHT  # Pour decentrer vers le bas (bar d'outils)
     return points
 
 def min_max(points):
@@ -44,4 +50,4 @@ def redimension(points, WIDTH, HEIGHT):
             points[key][1] += mini_Y
         points[key][0] *= ratio
         points[key][1] *= ratio
-    return rescale(points, WIDTH, HEIGHT, mini_X * ratio, maxi_Y * ratio)
+    return recenter(points, WIDTH, HEIGHT)
