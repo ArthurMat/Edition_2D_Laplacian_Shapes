@@ -3,3 +3,4 @@ Le but de ce projet est de développer un outil de déformation de surfaces de t
 
 # Liens
 https://www.cs.cmu.edu/~quake/triangle.html
+https://github.com/luost26/laplacian-surface-editing/blob/master/main.py
