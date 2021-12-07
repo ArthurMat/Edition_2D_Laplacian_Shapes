@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 
-def to_pygame(points, HEIGHT, mini_X, maxi_Y):
+def to_pygame(points, HEIGHT):
     for key in points:
-        points[key][1] += (HEIGHT - maxi_Y) / 2
-        points[key][1] = HEIGHT - points[key][1]
-        points[key][0] -= mini_X / 2
+        points[key][1] =  0.9 * HEIGHT - points[key][1]
+    return points
+
+def rescale(points, WIDTH, HEIGHT, mini_X, maxi_Y):
+    for key in points:
+        points[key][1] += (0.9 * HEIGHT - maxi_Y) / 2
+        points[key][0] -= (mini_X - 0.1 * WIDTH) / 2
     return points
 
 def min_max(points):
@@ -32,7 +36,7 @@ def redimension(points, WIDTH, HEIGHT):
         add_Y = True
         mini_Y = abs(mini_Y)
         maxi_Y += mini_Y
-    ratio = min(WIDTH, HEIGHT) / max(maxi_X, maxi_Y)
+    ratio = 0.9 * min(WIDTH, HEIGHT) / max(maxi_X, maxi_Y) # modifier ration *0.9 pour laisser une marge et onc modifier aussi to_pygame
     for key in points:
         if add_X:
             points[key][0] += mini_X
@@ -40,4 +44,4 @@ def redimension(points, WIDTH, HEIGHT):
             points[key][1] += mini_Y
         points[key][0] *= ratio
         points[key][1] *= ratio
-    return to_pygame(points, HEIGHT, mini_X * ratio, maxi_Y * ratio)
+    return rescale(points, WIDTH, HEIGHT, mini_X * ratio, maxi_Y * ratio)
