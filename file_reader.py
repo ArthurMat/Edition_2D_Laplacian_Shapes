@@ -73,7 +73,6 @@ def to_dict(path):
                     i = 0
                     cptr = 0
                     nb_seg, i = read_int(ligne, i)
-                    print(nb_seg)
                 cptr += 1
     return dico_points, dico_seg
             
