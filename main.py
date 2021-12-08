@@ -33,10 +33,13 @@ def main():
     if len(sys.argv) == 1:
         points, seg = to_dict(option.PATH)
     else:
+        path = None
         for arg in sys.argv:
             if arg[:-5] == ".poly":
                 path = arg
-        points, seg = to_dict(arg)
+        if path is None:
+            path = option.PATH
+        points, seg = to_dict(path)
     # print(points, end='\n\n')
     # print(seg)
     main_interface(points, seg, option.WIDTH, option.HEIGHT)

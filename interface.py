@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 
-import pygame
 import sys
-from copy import deepcopy
-from redimension import *
+import pygame
 from tools import *
+from copy import deepcopy
 
 def draw_poly(screen, points, seg):
     for key, value in seg.items():
@@ -25,11 +24,16 @@ def move(points, liste_cercles, pos, pos2):
         points[key][1] += dy
 
 def update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode):
+    # Screen
     screen.fill((255, 255, 255))
-    pygame.draw.rect(screen, (128, 128, 128), pygame.Rect(0, 0, WIDTH, 0.05 * HEIGHT))
+    # Polyline
     draw_poly(screen, points, seg)
+    # Nodes
     for key in liste_cerlces:
         pygame.draw.circle(screen, color=(255, 0, 0), center=points[key], radius=max(min(4, min(WIDTH, HEIGHT)* 0.009),1.75))
+    # Toolbar
+    pygame.draw.rect(screen, (128, 128, 128), pygame.Rect(0, 0, WIDTH, 0.05 * HEIGHT))
+    # Buttons
     if select_mode:
         pygame.draw.circle(screen, color=(255, 0, 0), center=(WIDTH*0.05, HEIGHT*0.05/2), radius=HEIGHT*0.04/2)
         pygame.draw.circle(screen, color=(0, 50, 0), center=(WIDTH*0.11, HEIGHT*0.05/2), radius=HEIGHT*0.04/2)
@@ -68,6 +72,14 @@ def main_interface(points, seg, WIDTH=750, HEIGHT=750):
                 if event.key == pygame.K_s:
                     select_mode = not select_mode
                     update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode)
+                if event.key == pygame.K_a:
+                    mods = pygame.key.get_mods()
+                    if mods & pygame.KMOD_CTRL and mods & pygame.KMOD_SHIFT:
+                        liste_cerlces = []
+                        update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode)
+                    elif mods & pygame.KMOD_CTRL:
+                        liste_cerlces = list(points.keys())
+                        update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode)
             if event.type == pygame.VIDEORESIZE:
                 WIDTH, HEIGHT = screen.get_size()
                 points = deepcopy(copy_points)
