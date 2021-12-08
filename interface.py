@@ -31,6 +31,7 @@ def update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT):
 
 def main_interface(points, seg, WIDTH=750, HEIGHT=750):
     pygame.init()
+    pygame.font.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
     clock = pygame.time.Clock()
     
@@ -45,6 +46,7 @@ def main_interface(points, seg, WIDTH=750, HEIGHT=750):
     pos = None
     mousedrag = False
     mouse_down = False
+    select_mode = True
     liste_cerlces = []
 
     update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT)
@@ -54,6 +56,9 @@ def main_interface(points, seg, WIDTH=750, HEIGHT=750):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_s:
+                    select_mode = not select_mode
             if event.type == pygame.VIDEORESIZE:
                 WIDTH, HEIGHT = screen.get_size()
                 points = deepcopy(copy_points)
@@ -67,7 +72,7 @@ def main_interface(points, seg, WIDTH=750, HEIGHT=750):
                     mouse_down = True
             elif event.type == pygame.MOUSEBUTTONUP:
                 pos2 = pygame.mouse.get_pos()
-                if mouse_down:
+                if mouse_down and select_mode:
                     liste_cerlces = select(screen, points, seg, pos, pos2)
                     mouse_down = False
                     mousedrag = False
@@ -76,11 +81,14 @@ def main_interface(points, seg, WIDTH=750, HEIGHT=750):
                 if mouse_down:
                     actu_pos = pygame.mouse.get_pos()
                     mousedrag = True
-        if mousedrag:
+        if mousedrag and select_mode:
             update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT)
             mouseRectCorners = [pos, [pos[0], actu_pos[1]], actu_pos, [actu_pos[0], pos[1]]]
             pygame.draw.lines(screen, color=(0, 0, 255), closed=True, points=mouseRectCorners, width=1)
+        elif mousedrag and not select_mode:
+            continue  # fonction move(points, liste_cercle) avec fonction qui lie liste_cercle et points
         pygame.display.update()
 
 
         # https://www.geeksforgeeks.org/how-to-create-buttons-in-a-game-using-pygame/
+        
