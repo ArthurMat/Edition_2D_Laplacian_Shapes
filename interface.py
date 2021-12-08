@@ -29,7 +29,7 @@ def update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode):
     pygame.draw.rect(screen, (128, 128, 128), pygame.Rect(0, 0, WIDTH, 0.05 * HEIGHT))
     draw_poly(screen, points, seg)
     for key in liste_cerlces:
-        pygame.draw.circle(screen, color=(255, 0, 0), center=points[key], radius=4)
+        pygame.draw.circle(screen, color=(255, 0, 0), center=points[key], radius=max(min(4, min(WIDTH, HEIGHT)* 0.009),1.75))
     if select_mode:
         pygame.draw.circle(screen, color=(255, 0, 0), center=(WIDTH*0.05, HEIGHT*0.05/2), radius=HEIGHT*0.04/2)
         pygame.draw.circle(screen, color=(0, 50, 0), center=(WIDTH*0.11, HEIGHT*0.05/2), radius=HEIGHT*0.04/2)
