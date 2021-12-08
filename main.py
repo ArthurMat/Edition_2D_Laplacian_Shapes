@@ -19,7 +19,7 @@ def parametres():
                       help="Vous permet de changer la heuteur de la fenetre\n")
     parser.add_option("-f", "-p", "--fichier", "--path",
                       dest="PATH", default="test/a.poly", type='str',
-                      help="Vous permet de changer le chemin du fichier utilisé\n")
+                      help="Vous permet de changer le chemin du fichier utilisé (les prefixes ne sont pas obligatoires, ne rien mettre devant le chemin marche aussi)\n")
     (option, args) = parser.parse_args()
     if option.WIDTH < 0:
         parser.error(f"\tAttention, vous avez rentré une valeur négative pour la largeur de la fenetre : {option.LIGNE}")
@@ -33,7 +33,10 @@ def main():
     if len(sys.argv) == 1:
         points, seg = to_dict(option.PATH)
     else:
-        points, seg = to_dict(sys.argv[1])
+        for arg in sys.argv:
+            if arg[:-5] == ".poly":
+                path = arg
+        points, seg = to_dict(arg)
     # print(points, end='\n\n')
     # print(seg)
     main_interface(points, seg, option.WIDTH, option.HEIGHT)
