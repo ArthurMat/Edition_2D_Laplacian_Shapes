@@ -77,6 +77,9 @@ def main_interface(points, seg, WIDTH=750, HEIGHT=750):
                 pos = pygame.mouse.get_pos()
                 if pos[1] > HEIGHT * 0.05:
                     mouse_down = True
+                elif WIDTH*0.05 - HEIGHT*0.04/2 <= pos[0] <= WIDTH*0.05 + HEIGHT*0.04/2 or WIDTH*0.11 - HEIGHT*0.04/2 <= pos[0] <= WIDTH*0.11 + HEIGHT*0.04/2:
+                    select_mode = not select_mode
+                    update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode)
             elif event.type == pygame.MOUSEBUTTONUP:
                 pos2 = pygame.mouse.get_pos()
                 if mouse_down and select_mode:
