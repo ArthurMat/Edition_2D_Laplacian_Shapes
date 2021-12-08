@@ -51,6 +51,7 @@ def main_interface(points, seg, WIDTH=750, HEIGHT=750):
     points = to_pygame(points, WIDTH, HEIGHT)
     copy_points = deepcopy(points)
     points = redimension(points, WIDTH, HEIGHT)
+    save_points = deepcopy(points)
 
     screen.fill((255, 255, 255))
     draw_poly(screen, points, seg)    
@@ -69,11 +70,14 @@ def main_interface(points, seg, WIDTH=750, HEIGHT=750):
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
+                mods = pygame.key.get_mods()
                 if event.key == pygame.K_s:
                     select_mode = not select_mode
                     update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode)
+                if event.key == pygame.K_z and mods & pygame.KMOD_CTRL:
+                    points = deepcopy(save_points)
+                    update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode)
                 if event.key == pygame.K_a:
-                    mods = pygame.key.get_mods()
                     if mods & pygame.KMOD_CTRL and mods & pygame.KMOD_SHIFT:
                         liste_cerlces = []
                         update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode)
@@ -90,6 +94,7 @@ def main_interface(points, seg, WIDTH=750, HEIGHT=750):
                 pos = pygame.mouse.get_pos()
                 last_pos = pos
                 if pos[1] > HEIGHT * 0.05:
+                    save_points = deepcopy(points)
                     mouse_down = True
                 elif WIDTH*0.05 - HEIGHT*0.04/2 <= pos[0] <= WIDTH*0.05 + HEIGHT*0.04/2 or WIDTH*0.11 - HEIGHT*0.04/2 <= pos[0] <= WIDTH*0.11 + HEIGHT*0.04/2:
                     select_mode = not select_mode
