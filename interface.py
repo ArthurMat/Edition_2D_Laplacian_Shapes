@@ -96,8 +96,9 @@ def main_interface(points, seg, WIDTH=750, HEIGHT=750):
                 pos = pygame.mouse.get_pos()
                 last_pos = pos
                 if pos[1] > HEIGHT * 0.05:
-                    save_points.append(deepcopy(points))
                     mouse_down = True
+                    if not select_mode:
+                        save_points.append(deepcopy(points))
                 elif WIDTH*0.05 - HEIGHT*0.04/2 <= pos[0] <= WIDTH*0.05 + HEIGHT*0.04/2 or WIDTH*0.11 - HEIGHT*0.04/2 <= pos[0] <= WIDTH*0.11 + HEIGHT*0.04/2:
                     select_mode = not select_mode
                     update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode)
