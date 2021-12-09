@@ -4,3 +4,23 @@ Le but de ce projet est de développer un outil de déformation de surfaces de t
 # Liens
 https://www.cs.cmu.edu/~quake/triangle.html
 https://github.com/luost26/laplacian-surface-editing/blob/master/main.py
+
+# Utilisation
+Usage: ./main.py (options)
+ne rien mettre lance sur le fichier par défaut (a.poly)
+
+Options:
+  -h, --help            show this help message and exit
+  -W WIDTH, --width=WIDTH
+                        Vous permet de changer la largeur de la fenetre
+  -H HEIGHT, --height=HEIGHT
+                        Vous permet de changer la heuteur de la fenetre
+  -f PATH, -p PATH, --fichier=PATH, --path=PATH
+                        Vous permet de changer le chemin du fichier utilisé
+
+# Features
+Raccourcis :
+- "s" :                     permet de switcher entre le mode de selection des points et le mode de déplacement des points (indicateurs rouge et vert)
+- "ctrl" + "a" :            permet de selectionner tous les points
+- "ctrl" + "shift" + a :    permet de déselectionner tous les points
+- "ctrl" + "z" :            annule le dernier déplacement de points
