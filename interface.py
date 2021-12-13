@@ -23,46 +23,52 @@ def move(points, liste_cercles, pos, pos2):
         points[key][0] += dx
         points[key][1] += dy
 
-def update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode):
+def update(screen, data, select_mode):
     # Screen
     screen.fill((255, 255, 255))
     # Polyline
-    draw_poly(screen, points, seg)
+    draw_poly(screen, data.points, data.seg)
     # Nodes
-    for key in liste_cerlces:
-        pygame.draw.circle(screen, color=(255, 0, 0), center=points[key], radius=max(min(4, min(WIDTH, HEIGHT)* 0.009),1.75))
+    for key in data.liste_cercles:
+        pygame.draw.circle(screen, color=(255, 0, 0), center=data.points[key], radius=max(min(4, min(data.WIDTH, data.HEIGHT)* 0.009),1.75))
     # Toolbar
-    pygame.draw.rect(screen, (128, 128, 128), pygame.Rect(0, 0, WIDTH, 0.05 * HEIGHT))
+    pygame.draw.rect(screen, (128, 128, 128), pygame.Rect(0, 0, data.WIDTH, 0.05 * data.HEIGHT))
     # Buttons
     if select_mode:
-        pygame.draw.circle(screen, color=(255, 0, 0), center=(WIDTH*0.05, HEIGHT*0.05/2), radius=HEIGHT*0.04/2)
-        pygame.draw.circle(screen, color=(0, 50, 0), center=(WIDTH*0.11, HEIGHT*0.05/2), radius=HEIGHT*0.04/2)
+        pygame.draw.circle(screen, color=(255, 0, 0), center=(data.WIDTH*0.05, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.04/2)
+        pygame.draw.circle(screen, color=(0, 50, 0), center=(data.WIDTH*0.11, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.04/2)
     else:
-        pygame.draw.circle(screen, color=(50, 0, 0), center=(WIDTH*0.05, HEIGHT*0.05/2), radius=HEIGHT*0.04/2)
-        pygame.draw.circle(screen, color=(0, 255, 0), center=(WIDTH*0.11, HEIGHT*0.05/2), radius=HEIGHT*0.04/2)
+        pygame.draw.circle(screen, color=(50, 0, 0), center=(data.WIDTH*0.05, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.04/2)
+        pygame.draw.circle(screen, color=(0, 255, 0), center=(data.WIDTH*0.11, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.04/2)
+    if data.load:
+        pygame.draw.circle(screen, color=(200, 100, 0), center=(data.WIDTH*0.45, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.04/2)
+        pygame.draw.circle(screen, color=(50, 25, 0), center=(data.WIDTH*0.56, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.04/2)
+    else:
+        pygame.draw.circle(screen, color=(50, 25, 0), center=(data.WIDTH*0.45, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.04/2)
+        pygame.draw.circle(screen, color=(200, 100, 0), center=(data.WIDTH*0.56, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.04/2)
 
-def main_interface(points, seg, WIDTH=750, HEIGHT=750):
+def main_interface(data, WIDTH=750, HEIGHT=750):
     pygame.init()
     pygame.font.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
     clock = pygame.time.Clock()
     
     # Faire une copie et repartir de la copie à chaque rescale.
-    points = to_pygame(points, WIDTH, HEIGHT)
-    copy_points = deepcopy(points)
-    points = redimension(points, WIDTH, HEIGHT)
-    save_points = []
+    data.WIDTH, data.HEIGHT = WIDTH, HEIGHT
+    data.transform()
+    data.redim()
+    data.points, data.seg = deepcopy(data.mesh_points), deepcopy(data.mesh_seg)
+    data.switch()
 
     screen.fill((255, 255, 255))
-    draw_poly(screen, points, seg)    
+    draw_poly(screen, data.points, data.seg)    
 
     pos = None
     mousedrag = False
     mouse_down = False
     select_mode = True
-    liste_cerlces = []
 
-    update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode)
+    update(screen, data, select_mode)
     pygame.display.update()
     while True:
         for event in pygame.event.get():
@@ -73,24 +79,21 @@ def main_interface(points, seg, WIDTH=750, HEIGHT=750):
                 mods = pygame.key.get_mods()
                 if event.key == pygame.K_s:
                     select_mode = not select_mode
-                    update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode)
                 if event.key == pygame.K_z and mods & pygame.KMOD_CTRL:
-                    if len(save_points) > 0:
-                        points = deepcopy(save_points[-1])
-                        save_points.pop(-1)
-                    update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode)
+                    if len(data.save_points) > 0:
+                        data.points = deepcopy(data.save_points[-1])
+                        data.save_points.pop(-1)
                 if event.key == pygame.K_a:
                     if mods & pygame.KMOD_CTRL and mods & pygame.KMOD_SHIFT:
-                        liste_cerlces = []
-                        update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode)
+                        data.liste_cercles = []
                     elif mods & pygame.KMOD_CTRL:
-                        liste_cerlces = list(points.keys())
-                        update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode)
+                        data.liste_cercles = list(data.points.keys())
+                update(screen, data, select_mode)
             if event.type == pygame.VIDEORESIZE:
-                WIDTH, HEIGHT = screen.get_size()
-                points = deepcopy(copy_points)
-                points = redimension(points, WIDTH, HEIGHT)
-                update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode)
+                data.WIDTH, data.HEIGHT = screen.get_size()
+                data.points = deepcopy(data.copy_points)
+                data.redim()
+                update(screen, data, select_mode)
                 pygame.display.update()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
@@ -98,17 +101,19 @@ def main_interface(points, seg, WIDTH=750, HEIGHT=750):
                 if pos[1] > HEIGHT * 0.05:
                     mouse_down = True
                     if not select_mode:
-                        save_points.append(deepcopy(points))
-                elif WIDTH*0.05 - HEIGHT*0.04/2 <= pos[0] <= WIDTH*0.05 + HEIGHT*0.04/2 or WIDTH*0.11 - HEIGHT*0.04/2 <= pos[0] <= WIDTH*0.11 + HEIGHT*0.04/2:
+                        data.save_points.append(deepcopy(data.points))
+                elif data.WIDTH*0.05 - data.HEIGHT*0.04/2 <= pos[0] <= data.WIDTH*0.05 + data.HEIGHT*0.04/2 or data.WIDTH*0.11 - data.HEIGHT*0.04/2 <= pos[0] <= data.WIDTH*0.11 + data.HEIGHT*0.04/2:
                     select_mode = not select_mode
-                    update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode)
+                elif data.WIDTH*0.45 - data.HEIGHT*0.04/2 <= pos[0] <= data.WIDTH*0.45 + data.HEIGHT*0.04/2 or data.WIDTH*0.56 - data.HEIGHT*0.04/2 <= pos[0] <= data.WIDTH*0.56 + data.HEIGHT*0.04/2:
+                    data.switch()
+                update(screen, data, select_mode)
             elif event.type == pygame.MOUSEBUTTONUP:
                 pos2 = pygame.mouse.get_pos()
                 if mouse_down and select_mode:
-                    liste_cerlces = select(points, pos, pos2)
+                    data.liste_cercles = select(data.points, pos, pos2)
                     mouse_down = False
                     mousedrag = False
-                    update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode)
+                    update(screen, data, select_mode)
                 elif mouse_down and not select_mode:
                     mouse_down = False
                     mousedrag = False
@@ -117,12 +122,12 @@ def main_interface(points, seg, WIDTH=750, HEIGHT=750):
                     actu_pos = pygame.mouse.get_pos()
                     mousedrag = True
         if mousedrag and select_mode:
-            update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode)
+            update(screen, data, select_mode)
             mouseRectCorners = [pos, [pos[0], actu_pos[1]], actu_pos, [actu_pos[0], pos[1]]]
             pygame.draw.lines(screen, color=(0, 0, 255), closed=True, points=mouseRectCorners, width=1)
         elif mousedrag and not select_mode:
-            move(points, liste_cerlces, last_pos, actu_pos)
-            update(screen, points, seg, liste_cerlces, WIDTH, HEIGHT, select_mode)
+            move(data.points, data.liste_cercles, last_pos, actu_pos)
+            update(screen, data, select_mode)
             last_pos = actu_pos
         pygame.display.update()
 

@@ -4,6 +4,7 @@ import sys
 import optparse
 from file_reader import to_dict
 from interface import *
+from data import Data
 
 def parametres():
     """
@@ -31,7 +32,7 @@ def main():
     option, args = parametres()
     print("\nTo switch from the SELECT mode to the MOVE mode, push 'S' or click on the colored cirlces (RED & GREEN) !\n")
     if len(sys.argv) == 1:
-        points, seg = to_dict(option.PATH)
+        data = Data(option.PATH)
     else:
         path = None
         for arg in sys.argv:
@@ -39,10 +40,9 @@ def main():
                 path = arg
         if path is None:
             path = option.PATH
-        points, seg = to_dict(path)
-    # print(points, end='\n\n')
-    # print(seg)
-    main_interface(points, seg, option.WIDTH, option.HEIGHT)
+        data = Data(path)
+
+    main_interface(data, option.WIDTH, option.HEIGHT)
 
 
 if __name__ == '__main__':

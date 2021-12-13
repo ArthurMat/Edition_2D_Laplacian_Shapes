@@ -73,3 +73,9 @@ def redimension(points, WIDTH, HEIGHT):
         points[key][0] *= ratio
         points[key][1] *= ratio
     return recenter(points, WIDTH, HEIGHT)
+
+def array_to_dict(liste):
+    dico = dict()
+    for i, elmt in enumerate(liste):
+        dico[i+1] = elmt
+    return dico
