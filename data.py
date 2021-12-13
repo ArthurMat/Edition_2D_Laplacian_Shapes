@@ -46,12 +46,28 @@ class Data:
             self.points, self.seg = deepcopy(self.mesh_points), deepcopy(self.mesh_seg)
             self.save_points = deepcopy(self.save_mesh)
         self.copy_points = deepcopy(self.points)
-        self.reset()
-
-    def reset(self):
         self.liste_cercles = []
-        # self.save_points = []
-    
+
     def save(self):
         self.copy_poly = deepcopy(self.poly_points)
         self.copy_mesh = deepcopy(self.mesh_points)
+
+    def reset(self):
+        self.poly_points, self.poly_seg = to_dict(self.filename)
+        triangulate(self.filename)  # mettre le '-a.01' en option pour choisir le maillage
+        arr1, arr2 = get_datas(self.filename[:-5])
+        self.mesh_points, self.mesh_seg = array_to_dict(arr1), array_to_dict(arr2)
+        self.copy_poly = deepcopy(self.poly_points)
+        self.copy_mesh = deepcopy(self.mesh_points)
+        self.points, self.seg = dict(), dict()
+        self.copy_points = deepcopy(self.points)
+        self.liste_cercles = []
+        self.save_poly = []
+        self.save_mesh = []
+        self.save_points = []
+        self.load = False
+        self.transform()
+        self.redim()
+        self.points, self.seg = deepcopy(self.mesh_points), deepcopy(self.mesh_seg)
+        self.switch()
+    

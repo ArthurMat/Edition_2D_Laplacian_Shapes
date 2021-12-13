@@ -23,6 +23,13 @@ def move(points, liste_cercles, pos, pos2):
         points[key][0] += dx
         points[key][1] += dy
 
+def reset_button(screen, WIDTH, HEIGHT):
+    pi = 3.14159265359
+    rec = pygame.Rect(WIDTH*0.95 - HEIGHT*0.012, HEIGHT*0.012, HEIGHT*0.025, HEIGHT*0.025)
+    pygame.draw.circle(screen, color=(128, 0, 0), center=(WIDTH*0.95, HEIGHT*0.05/2), radius=HEIGHT*0.02)
+    pygame.draw.arc(screen, color=(255, 255, 255), rect=rec, start_angle=pi, stop_angle=pi/2, width=3)
+    # pygame.draw.rect(screen, color=(255, 255, 255), rect=rec, width=3)
+
 def update(screen, data, select_mode):
     # Screen
     screen.fill((255, 255, 255))
@@ -35,21 +42,23 @@ def update(screen, data, select_mode):
     pygame.draw.rect(screen, (128, 128, 128), pygame.Rect(0, 0, data.WIDTH, 0.05 * data.HEIGHT))
     # Buttons
     if select_mode:
-        pygame.draw.circle(screen, color=(255, 0, 0), center=(data.WIDTH*0.05, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.04/2)
-        pygame.draw.circle(screen, color=(0, 50, 0), center=(data.WIDTH*0.11, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.04/2)
+        pygame.draw.circle(screen, color=(255, 0, 0), center=(data.WIDTH*0.05, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.02)
+        pygame.draw.circle(screen, color=(0, 50, 0), center=(data.WIDTH*0.11, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.02)
     else:
-        pygame.draw.circle(screen, color=(50, 0, 0), center=(data.WIDTH*0.05, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.04/2)
-        pygame.draw.circle(screen, color=(0, 255, 0), center=(data.WIDTH*0.11, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.04/2)
+        pygame.draw.circle(screen, color=(50, 0, 0), center=(data.WIDTH*0.05, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.02)
+        pygame.draw.circle(screen, color=(0, 255, 0), center=(data.WIDTH*0.11, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.02)
     if data.load:
-        pygame.draw.circle(screen, color=(200, 100, 0), center=(data.WIDTH*0.45, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.04/2)
-        pygame.draw.circle(screen, color=(50, 25, 0), center=(data.WIDTH*0.56, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.04/2)
+        pygame.draw.circle(screen, color=(200, 100, 0), center=(data.WIDTH*0.45, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.02)
+        pygame.draw.circle(screen, color=(50, 25, 0), center=(data.WIDTH*0.56, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.02)
     else:
-        pygame.draw.circle(screen, color=(50, 25, 0), center=(data.WIDTH*0.45, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.04/2)
-        pygame.draw.circle(screen, color=(200, 100, 0), center=(data.WIDTH*0.56, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.04/2)
+        pygame.draw.circle(screen, color=(50, 25, 0), center=(data.WIDTH*0.45, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.02)
+        pygame.draw.circle(screen, color=(200, 100, 0), center=(data.WIDTH*0.56, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.02)
+    reset_button(screen, data.WIDTH, data.HEIGHT)
 
 def main_interface(data, WIDTH=750, HEIGHT=750):
     pygame.init()
     pygame.font.init()
+    pygame.display.set_caption("2D Laplacian Editor")
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
     clock = pygame.time.Clock()
     
@@ -93,6 +102,7 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                 data.WIDTH, data.HEIGHT = screen.get_size()
                 data.points = deepcopy(data.copy_points)
                 data.redim()
+                redimension(data.points, data.WIDTH, data.HEIGHT)
                 update(screen, data, select_mode)
                 pygame.display.update()
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -106,6 +116,8 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                     select_mode = not select_mode
                 elif data.WIDTH*0.45 - data.HEIGHT*0.04/2 <= pos[0] <= data.WIDTH*0.45 + data.HEIGHT*0.04/2 or data.WIDTH*0.56 - data.HEIGHT*0.04/2 <= pos[0] <= data.WIDTH*0.56 + data.HEIGHT*0.04/2:
                     data.switch()
+                elif WIDTH*0.95 - HEIGHT*0.012 <= pos[0] <= WIDTH*0.95 + HEIGHT*0.012:
+                    data.reset()
                 update(screen, data, select_mode)
             elif event.type == pygame.MOUSEBUTTONUP:
                 pos2 = pygame.mouse.get_pos()
