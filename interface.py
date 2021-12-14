@@ -116,7 +116,8 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                     select_mode = not select_mode
                 elif data.WIDTH*0.45 - data.HEIGHT*0.04/2 <= pos[0] <= data.WIDTH*0.45 + data.HEIGHT*0.04/2 or data.WIDTH*0.56 - data.HEIGHT*0.04/2 <= pos[0] <= data.WIDTH*0.56 + data.HEIGHT*0.04/2:
                     data.switch()
-                elif WIDTH*0.95 - HEIGHT*0.012 <= pos[0] <= WIDTH*0.95 + HEIGHT*0.012:
+                elif data.WIDTH*0.95 - data.HEIGHT*0.012 <= pos[0] <= data.WIDTH*0.95 + data.HEIGHT*0.012:
+                    data.WIDTH, data.HEIGHT = screen.get_size()
                     data.reset()
                 update(screen, data, select_mode)
             elif event.type == pygame.MOUSEBUTTONUP:
