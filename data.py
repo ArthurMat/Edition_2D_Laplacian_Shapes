@@ -23,6 +23,7 @@ class Data:
         self.save_mesh = []
         self.save_points = []
         self.load = False
+        self.add = False
 
     def transform(self):
         self.poly_points = to_pygame(self.poly_points, self.WIDTH, self.HEIGHT)
@@ -66,8 +67,8 @@ class Data:
         self.save_mesh = []
         self.save_points = []
         self.load = False
+        self.add = False
         self.transform()
         self.redim()
         self.points, self.seg = deepcopy(self.mesh_points), deepcopy(self.mesh_seg)
         self.switch()
-    
