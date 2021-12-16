@@ -4,6 +4,7 @@ from triangulate import *
 from file_reader import *
 from tools import *
 from copy import deepcopy
+import os
 
 class Data:
     def __init__(self, filename):
@@ -11,7 +12,8 @@ class Data:
         self.WIDTH = 0
         self.HEIGHT = 0
         self.poly_points, self.poly_seg = to_dict(self.filename)
-        triangulate(self.filename)  # mettre le '-a.01' en option pour choisir le maillage
+        if not os.path.exists(self.filename[:-5] + ".1.node"):
+            triangulate(self.filename)  # mettre le '-a.01' en option pour choisir le maillage
         arr1, arr2 = get_datas(self.filename[:-5])
         self.mesh_points, self.mesh_seg = array_to_dict(arr1), array_to_dict(arr2)
         self.copy_poly = deepcopy(self.poly_points)
@@ -53,9 +55,22 @@ class Data:
         self.copy_poly = deepcopy(self.poly_points)
         self.copy_mesh = deepcopy(self.mesh_points)
 
+    def suppression(self):
+        cles_s = []
+        for k in self.liste_cercles:
+            self.points.pop(k)
+            for key, val in self.seg.items():
+                if k in val:
+                    cles_s.append(key)
+        for k in cles_s:
+            self.seg.pop(k)
+        self.liste_cercles = []
+        print(self.points)
+        print("\n")
+        print(self.seg)
+
     def reset(self):
         self.poly_points, self.poly_seg = to_dict(self.filename)
-        triangulate(self.filename)  # mettre le '-a.01' en option pour choisir le maillage
         arr1, arr2 = get_datas(self.filename[:-5])
         self.mesh_points, self.mesh_seg = array_to_dict(arr1), array_to_dict(arr2)
         self.copy_poly = deepcopy(self.poly_points)

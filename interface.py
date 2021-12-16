@@ -2,12 +2,17 @@
 
 import sys
 import pygame
+from pygame import color
 from tools import *
 from copy import deepcopy
 
 def draw_poly(screen, points, seg):
     for key, value in seg.items():
         pygame.draw.line(screen, color=(0, 0, 0), start_pos=points[value[0]], end_pos=points[value[1]], width=2)
+
+def draw_points(screen, data):
+    for key, value in data.points.items():
+        pygame.draw.circle(screen, color=(0, 0, 0), center=value, radius=max(min(4, min(data.WIDTH, data.HEIGHT)* 0.009),1.75))
 
 def select(points, pos, pos2):
     liste = inside(points, pos, pos2)
@@ -68,6 +73,9 @@ def add_remove(screen, data, ar_mode):
         pygame.draw.polygon(screen, color=(0, 0, 0), points=[[data.WIDTH*0.45 + data.HEIGHT*0.115, data.HEIGHT*0.03], [data.WIDTH*0.45 + data.HEIGHT*0.135, data.HEIGHT*0.03], [data.WIDTH*0.45 + data.HEIGHT*0.125, data.HEIGHT*0.04]])
         if data.add:
             pygame.draw.rect(screen, color=(255, 255, 255), rect=pygame.Rect(data.WIDTH*0.45-data.HEIGHT*0.0025, data.HEIGHT*0.01, data.HEIGHT*0.005, data.HEIGHT*0.03))
+        else:
+            pygame.draw.circle(screen, color=(200, 0, 0), center=(data.WIDTH*0.45 - data.HEIGHT*0.04, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.015)
+            pygame.draw.rect(screen, color=(255, 255, 255), rect=pygame.Rect(data.WIDTH*0.45-data.HEIGHT*0.051, data.HEIGHT*0.0225, data.HEIGHT*0.02, data.HEIGHT*0.005))
         if ar_mode[1]:
             pygame.draw.line(screen, color=(0, 0, 0), start_pos=[data.WIDTH*0.45 + data.HEIGHT*0.05, data.HEIGHT*0.025], end_pos=[data.WIDTH*0.45 + data.HEIGHT*0.09, data.HEIGHT*0.025], width=3)
         else:
@@ -78,13 +86,11 @@ def update(screen, data, select_mode, ar_mode):
     screen.fill((255, 255, 255))
     # Polyline
     draw_poly(screen, data.points, data.seg)
-    # Nodes
-    for key in data.liste_cercles:
-        pygame.draw.circle(screen, color=(255, 0, 0), center=data.points[key], radius=max(min(4, min(data.WIDTH, data.HEIGHT)* 0.009),1.75))
     # Toolbar
     pygame.draw.rect(screen, (128, 128, 128), pygame.Rect(0, 0, data.WIDTH, 0.05 * data.HEIGHT))
     # Buttons
     if ar_mode[0]:
+        draw_points(screen, data)
         add_remove(screen, data, ar_mode)
         pygame.draw.circle(screen, color=(50, 0, 0), center=(data.WIDTH*0.05, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.02)
         pygame.draw.circle(screen, color=(0, 50, 0), center=(data.WIDTH*0.11, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.02)
@@ -109,6 +115,10 @@ def update(screen, data, select_mode, ar_mode):
         pygame.draw.circle(screen, color=(50, 25, 0), center=(data.WIDTH*0.75, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.02)
         pygame.draw.circle(screen, color=(200, 100, 0), center=(data.WIDTH*0.75 + data.HEIGHT*0.06, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.02)
     reset_button(screen, data.WIDTH, data.HEIGHT)
+    # Nodes
+    for key in data.liste_cercles:
+        pygame.draw.circle(screen, color=(255, 0, 0), center=data.points[key], radius=max(min(4, min(data.WIDTH, data.HEIGHT)* 0.009),1.75))
+
 
 def main_interface(data, WIDTH=750, HEIGHT=750):
     pygame.init()
@@ -131,7 +141,7 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
     mousedrag = False
     mouse_down = False
     select_mode = True
-    ar_mode = [False, False]
+    ar_mode = [False, False]  # [add/remove mode (decide by data.add), False=Point / True=Seg]
 
     update(screen, data, select_mode, ar_mode)
     pygame.display.update()
@@ -166,8 +176,17 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                 last_pos = pos
                 if pos[1] > HEIGHT * 0.05:
                     mouse_down = True
-                    if not select_mode:
+                    if ar_mode[0]:
+                        if not data.add:
+                            select_mode = True
+                        if not ar_mode[1] and data.add:
+                            select_mode = False
+                            k = len(data.points.keys())
+                            data.points[k+1] = [pos[0], pos[1]]
+                    elif not select_mode:
                         data.save_points.append(deepcopy(data.points))
+                elif ar_mode[0] and not ar_mode[1] and not data.add and data.WIDTH*0.45 - data.HEIGHT*0.04 - data.HEIGHT*0.015/2 <= pos[0] <= data.WIDTH*0.45 - data.HEIGHT*0.04 + data.HEIGHT*0.015/2:
+                    data.suppression()
                 elif data.WIDTH*0.05 - data.HEIGHT*0.02 <= pos[0] <= data.WIDTH*0.05 + data.HEIGHT*0.02 or data.WIDTH*0.11 - data.HEIGHT*0.02 <= pos[0] <= data.WIDTH*0.11 + data.HEIGHT*0.02:
                     select_mode = not select_mode
                     ar_mode[0]= False
