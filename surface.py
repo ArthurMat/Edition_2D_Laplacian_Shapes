@@ -34,7 +34,7 @@ class Surface:
         """
         Renvoie les coordonnées du points index
         """
-        return self.maillage['vertices'][index]
+        return self.maillage['vertices_list'][index]
 
     def find_closest_point(self, x:float, y:float) -> int:
         """
@@ -43,7 +43,7 @@ class Surface:
         dist_min = float("inf")
         i_min = -1
         p_ref = np.array([x, y])
-        for i, p in enumerate(self.maillage['vertices']):
+        for i, p in enumerate(self.maillage['vertices_list']):
             dist = np.linalg.norm(p-p_ref)
             if dist_min>dist:
                 i_min = i
@@ -56,7 +56,7 @@ class Surface:
         dist_min = float("inf")
         i_min = -1
         p_ref = np.array([x, y])
-        for i, p in enumerate(self.maillage['vertices']):
+        for i, p in enumerate(self.maillage['vertices_list']):
             if i in self.FixPoint:
                 dist = np.linalg.norm(p-p_ref)
                 if dist_min>dist:
@@ -95,7 +95,7 @@ class Surface:
         for c in range(0,len(Coordx)):
             x = Coordx[c]
             y = Coordy[c]
-            self.maillage['vertices'][int(c)]=np.array([x,y])
+            self.maillage['vertices_list'][int(c)]=np.array([x,y])
 
 
         self.drawMaillage()
@@ -159,7 +159,7 @@ class Surface:
         self.drawPointfix()
         plt.gcf().canvas.draw()
         canvas = FigureCanvasTkAgg(fig, master=root)
-        inv = ax.transData.inverted()#Fonction de changement de repère (fenetre->graphe)
+        inv = ax.transData.inverted()#Fonction de changement de repère (fenetre->gk)
         canvas.get_tk_widget().pack(padx=20,side=tk.TOP, fill=tk.BOTH, expand=False)
         button = Button(root, text = 'Close the window', command = root.quit)#Boutton pour quitter proprement
         button.pack(pady = 10)
@@ -214,7 +214,7 @@ class Surface:
 
     def Gij(self,i:int,j:int):
         """
-        Calcule la matrice G pour les points vi,vj
+        Calcule la matrice gk pour les points vi,vj
         """
         vix,viy=self.getPointWithIndex(i)
         vjx,vjy=self.getPointWithIndex(j)
@@ -243,10 +243,10 @@ class Surface:
             #si le segment n'est pas déja fait
             if(seg not in fait and (seg[1],seg[0]) not in fait):
                 #on va rajouter 2 lignes dans A1
-                l1 = [ 0 for i in range(len(self.maillage['vertices'])*2)]
-                l2 = [ 0 for i in range(len(self.maillage['vertices'])*2)]
+                l1 = [ 0 for i in range(len(self.maillage['vertices_list'])*2)]
+                l2 = [ 0 for i in range(len(self.maillage['vertices_list'])*2)]
 
-                #Ces deux lignes sont associe au segment ek
+                #Ces deux lignes sont associe au segment edge_k
                 point1 = self.getPointWithIndex(seg[0])
                 point2 = self.getPointWithIndex(seg[1])
                 ek = (point2[0] - point1[0], point2[1]-point1[1])
@@ -292,8 +292,8 @@ class Surface:
 
         #on ajoute maintenant les points du contour
         for i,nextPoint in self.adjSegContour:
-            l1 = [ 0 for i in range(len(self.maillage['vertices'])*2)]
-            l2 = [ 0 for i in range(len(self.maillage['vertices'])*2)]
+            l1 = [ 0 for i in range(len(self.maillage['vertices_list'])*2)]
+            l2 = [ 0 for i in range(len(self.maillage['vertices_list'])*2)]
             Gk = self.Gij(i,nextPoint)
             point1 = self.getPointWithIndex(i)
             point2 = self.getPointWithIndex(nextPoint)
@@ -336,8 +336,8 @@ class Surface:
 
         #on ajoute maintenant la partie point fixe de la matrice
         for p in self.FixPoint:
-            l1 = [ 0 for i in range(len(self.maillage['vertices'])*2)]
-            l2 = [ 0 for i in range(len(self.maillage['vertices'])*2)]
+            l1 = [ 0 for i in range(len(self.maillage['vertices_list'])*2)]
+            l2 = [ 0 for i in range(len(self.maillage['vertices_list'])*2)]
             l1[2*p] = w
             l2[2*p+1]= w
 
@@ -381,7 +381,7 @@ class Surface:
 
 
     def calculH(self,G,ek):
-        """On calcul H pour un segment ek associé a une matrice G"""
+        """On calcul H pour un segment edge_k associé a une matrice gk"""
         M = np.array([[-1,0,1,0,0,0,0,0],
                       [0,-1,0,1,0,0,0,0]])
 
@@ -407,9 +407,9 @@ class Surface:
             #si le segment n'est pas déja fait
             if(seg not in fait or (seg[1],seg[0]) not in fait):
                 #on va rajouter 2 lignes dans A1
-                l1 = [ 0 for i in range(len(self.maillage['vertices']))]
+                l1 = [ 0 for i in range(len(self.maillage['vertices_list']))]
 
-                #Ces deux lignes sont associe au segment ek
+                #Ces deux lignes sont associe au segment edge_k
                 point1 = self.getPointWithIndex(seg[0])
                 point2 = self.getPointWithIndex(seg[1])
                 ek = (point2[0] - point1[0], point2[1]-point1[1])
@@ -456,7 +456,7 @@ class Surface:
                      [-a*sk, a*ck]]
 
                 #Calcul de A2
-                #on veut calculer vi''-vj'' - T'i ek
+                #on veut calculer vi''-vj'' - T'i edge_k
                 l1[i] = -1 #vi''
                 l1[j] = 1 #-vj''
 
@@ -464,7 +464,7 @@ class Surface:
                 A2.append(l1)
 
                 #calcul de b
-                #ek [ekx,
+                #edge_k [ekx,
                 #    eky]
                 ek = np.transpose(np.array(ek))
                 #b = Tkek
@@ -477,10 +477,10 @@ class Surface:
         #on ajoute maintenant les points du contour
         for i,nextPoint in self.adjSegContour:
             #on ajoute une nouvelle ligne dans A et b
-            l1 = [ 0 for i in range(len(self.maillage['vertices']))]
+            l1 = [ 0 for i in range(len(self.maillage['vertices_list']))]
             #on calcul Gk
             Gk = self.Gij(i,nextPoint)
-            #on calcul ek
+            #on calcul edge_k
             point1 = self.getPointWithIndex(i)
             point2 = self.getPointWithIndex(nextPoint)
             ek = (point2[0] - point1[0], point2[1]-point1[1])
@@ -540,7 +540,7 @@ class Surface:
 
         #on ajoute maintenant la partie point fixe de la matrice
         for p in self.FixPoint:
-            l1 = [ 0 for i in range(len(self.maillage['vertices']))]
+            l1 = [ 0 for i in range(len(self.maillage['vertices_list']))]
             l1[p] = w
 
             #on ajoute les deux ligne dans la matrice
