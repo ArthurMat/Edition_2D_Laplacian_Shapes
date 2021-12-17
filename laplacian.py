@@ -145,6 +145,7 @@ def compute_a1_b1(graphe, handles, w):
 
 
 def compute_a2_b2(graphe, handles, v_prime, w):
+    """Compute A2 and b2 for the second step of the laplacian edition of the graphe with the parameter w."""
     a2 = []
     b2_x = []
     b2_y = []
