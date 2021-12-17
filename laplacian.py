@@ -24,7 +24,7 @@ def compute_h(g, e_matrix):
 
     mat3 = np.matmul(np.transpose(g), g)  # GT * G
     mat3 = np.linalg.inv(mat3)  # (GT * G)^-1
-    mat3 = np.matmul(mat3, g)  # (GT * G)^-1 * G
+    mat3 = np.matmul(mat3, np.transpose(g))  # (GT * G)^-1 * G
 
     return mat1 - np.matmul(e_matrix, mat3)
 
@@ -33,14 +33,11 @@ def n(graphe, edge_to_compute):
     """Find the point useful to compute a new edge (see schema of paper)"""
     v1, v2 = edge_to_compute
     liste = [v1, v2]
-    for neighbour in graphe.adj(v1):
-        if neighbour in graphe.adj(v2):
+    for neighbour in graphe.adj[v1]:
+        if neighbour in graphe.adj[v2]:
             liste.append(neighbour)
             if len(liste) == 4:
                 return liste
-
-    # Only 3 points
-    liste.append(None)
 
     return liste
 
@@ -48,23 +45,29 @@ def n(graphe, edge_to_compute):
 handles = [1, 2]
 
 #  Récupérer les points à modifier
-graphe_polyfile = load_polyfile("A.poly")
+graphe_polyfile = load_polyfile("A")
 
 # Créer un nouveau gk avec les points à modifier
 new_graph = graphe_polyfile.subgraph(graphe_polyfile.nodes)
 
 
-def compute_g(vertices_list):
+def compute_g(graphe, vertices_list):
     """Compute the matrix G associated to the vertices vertices_list"""
     gk_list = []
     for vertex in vertices_list:
-        vx = vertex['pos'](0)
-        vy = vertex['pos'](1)
+        vx = graphe.nodes[vertex]['pos'][0]
+        vy = graphe.nodes[vertex]['pos'][1]
 
         gk_list.append(vx)
         gk_list.append(vy)
         gk_list.append(vy)
         gk_list.append(-vx)
+
+    if len(vertices_list) == 3:
+        gk_list.append(0)
+        gk_list.append(0)
+        gk_list.append(0)
+        gk_list.append(0)
 
     return np.array(gk_list).reshape((8, 2))
 
@@ -79,12 +82,12 @@ def compute_a1_b1(w):
 
         # Compute Gk
         vertices = n(graphe_polyfile, edge)
-        gk = compute_g(vertices)
+        gk = compute_g(graphe_polyfile, vertices)
 
-        vl = vertices[3]
+        vl = vertices[2]
 
         # Compute ek_matrix
-        vi, vj = np.array(edge[0]), np.array(edge[1])
+        vi, vj = np.array(graphe_polyfile.nodes[edge[0]]['pos']), np.array(graphe_polyfile.nodes[edge[1]]['pos'])
         ek = vj - vi
         ekx, eky = ek[0], ek[1]
         ek_matrix = np.array([ekx, eky, eky, -ekx]).reshape((2, 2))
@@ -92,33 +95,34 @@ def compute_a1_b1(w):
         # Comput h
         h = compute_h(gk, ek_matrix)
 
+        i, j, l = vertices[0], vertices[1], vertices[2]
         # Add the bloc associated to vi
-        l1[vi * 2] = h[0][0]
-        l1[vi * 2 + 1] = h[0][1]
-        l2[vi * 2] = h[1][0]
-        l2[vi * 2 + 1] = h[1][1]
+        l1[i * 2] = h[0][0]
+        l1[i * 2 + 1] = h[0][1]
+        l2[i * 2] = h[1][0]
+        l2[i * 2 + 1] = h[1][1]
 
         # Add the bloc associated to vj
-        l1[vj * 2] = h[0][2]
-        l1[vj * 2 + 1] = h[0][3]
-        l2[vj * 2] = h[1][2]
-        l2[vj * 2 + 1] = h[1][3]
+        l1[j * 2] = h[0][2]
+        l1[j * 2 + 1] = h[0][3]
+        l2[j * 2] = h[1][2]
+        l2[j * 2 + 1] = h[1][3]
 
         # Add the bloc associated to vl
-        l1[vl * 2] = h[0][4]
-        l1[vl * 2 + 1] = h[0][5]
-        l2[vl * 2] = h[1][4]
-        l2[vl * 2 + 1] = h[1][5]
+        l1[l * 2] = h[0][4]
+        l1[l * 2 + 1] = h[0][5]
+        l2[l * 2] = h[1][4]
+        l2[l * 2 + 1] = h[1][5]
 
         if len(vertices) == 4:
             # Not a border
-            vr = vertices[4]
+            r = vertices[3]
 
             # Add the bloc associated to vr
-            l1[vr * 2] = h[0][6]
-            l1[vr * 2 + 1] = h[0][7]
-            l2[vr * 2] = h[1][6]
-            l2[vr * 2 + 1] = h[1][7]
+            l1[r * 2] = h[0][6]
+            l1[r * 2 + 1] = h[0][7]
+            l2[r * 2] = h[1][6]
+            l2[r * 2 + 1] = h[1][7]
 
         # Add tow ligne to matrix a
         a1.append(l1)
@@ -215,20 +219,5 @@ def compute_a2_b2(w, vprime):
         b2_y.append(ek[1])
 
 
-
-    for p in handles:
-        l1 = [0 for i in range(len(new_graph.nodes) * 2)]
-        l2 = [0 for i in range(len(new_graph.nodes) * 2)]
-
-        l1[2*p] = w
-        l2[2*p+1] = w
-
-        # Add tow ligne to matrix a
-        a1.append(l1)
-        a1.append(l2)
-
-        # Add tow ligne to matrix    b
-        b.append(w * graphe_polyfile.nodes[p][0])
-        b.append(w * graphe_polyfile.nodes[p][1])
-
-    return np.array(a1), np.transpose(np.array(b))
+if __name__ == '__main__':
+    compute_a1_b1(1000)
