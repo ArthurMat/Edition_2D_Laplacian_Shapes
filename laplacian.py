@@ -176,48 +176,46 @@ def compute_a2_b2(graphe, handles, v_prime, w):
                        vl[0], vl[1], vr[0], vr[1]]
         coordinates = np.transpose(np.array(coordinates))
 
-        # on calcul Gkt * Gk
+        # Compute Gkt * Gk
         mat3 = np.matmul(np.transpose(gk), gk)
-        # on calcul (Gkt*Gk)-1
+        # Compute (Gkt*Gk)-1
         mat3 = np.linalg.inv(mat3)
-        # on calcul mat3 [ck, sk]
+        # Compute mat3 [ck, sk]
         mat3 = np.matmul(mat3, np.transpose(gk))
         mat3 = np.transpose(np.matmul(mat3, coordinates))
         ck = mat3[0]
         sk = mat3[1]
 
-        # on calcul Tk
+        # Compute Tk
         a = 1 / (ck ** 2 + sk ** 2)
         tk = [[a * ck, a * sk],
               [-a * sk, a * ck]]
 
-        # Calcul de A2
-        # on veut calculer vi''-vj'' - T'i edge_k
+        # Compute a2
+        # We want to compute vi''-vj'' - T'i edge_k
         l1[i] = -1  # vi''
         l1[j] = 1  # -vj''
 
-        # on ajoute la ligne dans A2
+        # Add a line in a2
         a2.append(l1)
 
-        # calcul de b
+        # Compute b
         # edge_k [ekx,
-        #    eky]
+        #         eky]
         ek = np.transpose(ek)
         # b = Tk * ek
         ek = np.transpose(np.matmul(tk, ek))
-        # on ajoute dans b2_x et b2_y
+        # We add b2_x and b2_y
         b2_x.append(ek[0])
         b2_y.append(ek[1])
 
-    # on ajoute maintenant la partie point fixe de la matrice
+    # Now we deal with the handles points
     for p in handles:
         l1 = [0 for _ in range(len(graphe.nodes) * 2)]
         l1[p] = w
 
-        # on ajoute les deux lignes dans la matrice
         a2.append(l1)
 
-        # on ajoute 2 lignes dans b
         b2_x.append(w * graphe.nodes[p]['pos'][0])
         b2_y.append(w * graphe.nodes[p]['pos'][1])
 
@@ -225,7 +223,7 @@ def compute_a2_b2(graphe, handles, v_prime, w):
 
 
 def compute_new_points(handles, w):
-    #  Récupérer les points à modifier
+    #  We get the point to modify
     graphe_polyfile = load_polyfile("A")
     for i in handles:
         graphe_polyfile.nodes[i]['pos'][0] = graphe_polyfile.nodes[i]['pos'][0] + 0.01
@@ -233,10 +231,10 @@ def compute_new_points(handles, w):
     a = np.matmul(np.transpose(a1), a1)
     b = np.matmul(np.transpose(a1), b1)
 
-    # on résout l'équation
+    # We solve the first equation
     v_prime = np.linalg.solve(a, b)
 
-    # on fixe le scale
+    # And now we will solve the second
     a2, b2_x, b2_y = compute_a2_b2(graphe_polyfile, handles, v_prime, w)
     a = np.matmul(np.transpose(a2), a2)
     b_x = np.matmul(np.transpose(a2), b2_x)
