@@ -65,9 +65,9 @@ class Data:
         for k in cles_s:
             self.seg.pop(k)
         self.liste_cercles = []
-        print(self.points)
-        print("\n")
-        print(self.seg)
+    
+    def suppr_seg(self, seg_proche):
+        self.seg.pop(seg_proche)
 
     def reset(self):
         self.poly_points, self.poly_seg = to_dict(self.filename)

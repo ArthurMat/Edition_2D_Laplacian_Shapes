@@ -6,9 +6,12 @@ from pygame import color
 from tools import *
 from copy import deepcopy
 
-def draw_poly(screen, points, seg):
+def draw_poly(screen, points, seg, ar_mode, seg_proche):
     for key, value in seg.items():
-        pygame.draw.line(screen, color=(0, 0, 0), start_pos=points[value[0]], end_pos=points[value[1]], width=2)
+        if ar_mode[1] and key == seg_proche:
+            pygame.draw.line(screen, color=(255, 0, 0), start_pos=points[value[0]], end_pos=points[value[1]], width=2)
+        else:
+            pygame.draw.line(screen, color=(0, 0, 0), start_pos=points[value[0]], end_pos=points[value[1]], width=2)
 
 def draw_points(screen, data):
     for key, value in data.points.items():
@@ -81,11 +84,11 @@ def add_remove(screen, data, ar_mode):
         else:
             pygame.draw.circle(screen, color=(0, 0, 0), center=(data.WIDTH*0.45 + data.HEIGHT*0.07, data.HEIGHT*0.025), radius=data.HEIGHT*0.015)
 
-def update(screen, data, select_mode, ar_mode):
+def update(screen, data, select_mode, ar_mode, seg_proche):
     # Screen
     screen.fill((255, 255, 255))
     # Polyline
-    draw_poly(screen, data.points, data.seg)
+    draw_poly(screen, data.points, data.seg, ar_mode, seg_proche)
     # Toolbar
     pygame.draw.rect(screen, (128, 128, 128), pygame.Rect(0, 0, data.WIDTH, 0.05 * data.HEIGHT))
     # Buttons
@@ -135,15 +138,16 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
     data.switch()
 
     screen.fill((255, 255, 255))
-    draw_poly(screen, data.points, data.seg)    
 
     pos = None
     mousedrag = False
     mouse_down = False
     select_mode = True
     ar_mode = [False, False]  # [add/remove mode (decide by data.add), False=Point / True=Seg]
+    seg_proche = None
 
-    update(screen, data, select_mode, ar_mode)
+    draw_poly(screen, data.points, data.seg, ar_mode, seg_proche)
+    update(screen, data, select_mode, ar_mode, seg_proche)
     pygame.display.update()
     while True:
         for event in pygame.event.get():
@@ -163,13 +167,13 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                         data.liste_cercles = []
                     elif mods & pygame.KMOD_CTRL:
                         data.liste_cercles = list(data.points.keys())
-                update(screen, data, select_mode, ar_mode)
+                update(screen, data, select_mode, ar_mode, seg_proche)
             if event.type == pygame.VIDEORESIZE:
                 data.WIDTH, data.HEIGHT = screen.get_size()
                 data.points = deepcopy(data.copy_points)
                 data.redim()
                 redimension(data.points, data.WIDTH, data.HEIGHT)
-                update(screen, data, select_mode, ar_mode)
+                update(screen, data, select_mode, ar_mode, seg_proche)
                 pygame.display.update()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
@@ -177,6 +181,10 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                 if pos[1] > HEIGHT * 0.05:
                     mouse_down = True
                     if ar_mode[0]:
+                        if ar_mode[1]:
+                            seg_proche = nearest_seg(data.points, data.seg, pos)
+                        else:
+                            seg_proche = None
                         if not data.add:
                             select_mode = True
                         if not ar_mode[1] and data.add:
@@ -185,44 +193,46 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                             data.points[k+1] = [pos[0], pos[1]]
                     elif not select_mode:
                         data.save_points.append(deepcopy(data.points))
-                elif ar_mode[0] and not ar_mode[1] and not data.add and data.WIDTH*0.45 - data.HEIGHT*0.04 - data.HEIGHT*0.015/2 <= pos[0] <= data.WIDTH*0.45 - data.HEIGHT*0.04 + data.HEIGHT*0.015/2:
-                    data.suppression()
+                elif ar_mode[0] and not data.add and data.WIDTH*0.45 - data.HEIGHT*0.04 - data.HEIGHT*0.015/2 <= pos[0] <= data.WIDTH*0.45 - data.HEIGHT*0.04 + data.HEIGHT*0.015/2:
+                    if not ar_mode[1]:
+                        data.suppression()
+                    else:
+                        data.suppr_seg(seg_proche)
+                        seg_proche = None
                 elif data.WIDTH*0.05 - data.HEIGHT*0.02 <= pos[0] <= data.WIDTH*0.05 + data.HEIGHT*0.02 or data.WIDTH*0.11 - data.HEIGHT*0.02 <= pos[0] <= data.WIDTH*0.11 + data.HEIGHT*0.02:
                     select_mode = not select_mode
-                    ar_mode[0]= False
+                    ar_mode = [False, False]
                 elif data.WIDTH*0.45 - data.HEIGHT*0.02 <= pos[0] <= data.WIDTH*0.45 + data.HEIGHT*0.02:
                     ar_mode[0] = True
                     data.add = not data.add
+                    data.liste_cercles = []
                 elif data.WIDTH*0.45 + data.HEIGHT*0.11 <= pos[0] <= data.WIDTH*0.45 + data.HEIGHT*0.14 and ar_mode[0]:
                     ar_mode[1] = not ar_mode[1]
                 elif data.WIDTH*0.75 - data.HEIGHT*0.02 <= pos[0] <= data.WIDTH*0.75 + data.HEIGHT*0.02 or data.WIDTH*0.75 + data.HEIGHT*0.04 <= pos[0] <= data.WIDTH*0.75 + data.HEIGHT*0.08:
                     data.switch()
-                    ar_mode[0] = False
+                    ar_mode = [False, False]
                 elif data.WIDTH*0.95 - data.HEIGHT*0.012 <= pos[0] <= data.WIDTH*0.95 + data.HEIGHT*0.012:
                     data.WIDTH, data.HEIGHT = screen.get_size()
                     data.reset()
-                update(screen, data, select_mode, ar_mode)
+                update(screen, data, select_mode, ar_mode, seg_proche)
             elif event.type == pygame.MOUSEBUTTONUP:
                 pos2 = pygame.mouse.get_pos()
-                if mouse_down and select_mode:
+                if mouse_down and select_mode and not ar_mode[0]:
                     data.liste_cercles = select(data.points, pos, pos2)
-                    mouse_down = False
-                    mousedrag = False
-                    update(screen, data, select_mode, ar_mode)
-                elif mouse_down and not select_mode:
-                    mouse_down = False
-                    mousedrag = False
+                    update(screen, data, select_mode, ar_mode, seg_proche)
+                mousedrag = False
+                mouse_down = False
             if event.type == pygame.MOUSEMOTION:
                 if mouse_down:
                     actu_pos = pygame.mouse.get_pos()
                     mousedrag = True
         if mousedrag and select_mode:
-            update(screen, data, select_mode, ar_mode)
+            update(screen, data, select_mode, ar_mode, seg_proche)
             mouseRectCorners = [pos, [pos[0], actu_pos[1]], actu_pos, [actu_pos[0], pos[1]]]
             pygame.draw.lines(screen, color=(0, 0, 255), closed=True, points=mouseRectCorners, width=1)
         elif mousedrag and not select_mode:
             move(data.points, data.liste_cercles, last_pos, actu_pos)
-            update(screen, data, select_mode, ar_mode)
+            update(screen, data, select_mode, ar_mode, seg_proche)
             last_pos = actu_pos
         pygame.display.update()
 

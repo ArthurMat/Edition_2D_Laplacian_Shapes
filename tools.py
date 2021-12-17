@@ -2,6 +2,7 @@
 
 from math import sqrt
 from copy import deepcopy
+import numpy as np
 
 def distance(p1, p2):
     return sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
@@ -81,5 +82,36 @@ def array_to_dict(liste):
         dico[i+1] = elmt
     return dico
 
+def coeff_dir(pt1, pt2):
+    if pt1[1] == pt2[1]:
+        pt1[1] += 0.0001
+    if pt1[0] == pt2[0]:
+        pt1[0] += 0.0001
+    return (pt1[1] - pt2[1]) / (pt1[0] - pt2[0])
 
-        
+def equ_droite(pt1, pt2):
+    a = coeff_dir(pt1, pt2)
+    b = pt1[1] - pt1[0] * a
+    return a, b
+
+def dist_seg(pos, segment):
+    a, b = equ_droite(segment[0], segment[1])
+    ap = -1/a
+    bp = pos[1] - pos[0] * ap
+    m = np.array([[-a, 1], [-ap, 1]])
+    n = np.array([b, bp])
+    x = np.linalg.solve(m,n)
+    print("intersection : {}, distance : {}\n".format(x, distance(pos, x)))
+    return distance(pos, x), x
+
+def nearest_seg(points, seg, pos):
+    lmb = 20
+    near = None
+    dist_min = None
+    for key, val in seg.items(): 
+        dist, x = dist_seg(pos, [points[val[0]], points[val[1]]])
+        if (points[val[0]][0] - lmb <= x[0] <= points[val[1]][0] + lmb or points[val[0]][0] + lmb >= x[0] >= points[val[1]][0] - lmb) and (points[val[0]][1] - lmb <= x[1] <= points[val[1]][1] + lmb or points[val[0]][1] + lmb >= x[1] >= points[val[1]][1] - lmb):
+            if dist_min == None or dist < dist_min:
+                near = key
+                dist_min = dist
+    return near
