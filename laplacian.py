@@ -4,7 +4,14 @@ from triangulate import *
 
 
 def load_polyfile(f_name):
-    """Load the polyfile of the file f_name and return the associated graph"""
+    """Load the polyfile of the file f_name and return the associated graph.
+
+    Args:
+        f_name: name of the file to load.
+
+    Returns:
+        graph: A network object representing the graph of the polyfile.
+    """
     verts, edges = get_datas(f_name)
     graph = nx.Graph()
 
@@ -20,33 +27,54 @@ def load_polyfile(f_name):
 
 
 def compute_h(g, e_matrix):
-    """Compute H for an edge e associated to the matrix e_matrix and g"""
+    """Compute H for an edge e associated to the matrix e_matrix and g.
+
+    Args:
+        g: Numpy matrix g associated to an edge e.
+        e_matrix: Numpy matrix [[ekx eky], [eky −ekx]] associated to an edge e.
+
+    Returns:
+        h: Matrix h associated to an edge e.
+    """
     mat1 = np.array([[-1, 0, 1, 0, 0, 0, 0, 0],
                      [0, -1, 0, 1, 0, 0, 0, 0]])
 
-    mat3 = np.matmul(np.transpose(g), g)  # GT * G
-    mat3 = np.linalg.inv(mat3)  # (GT * G)^-1
-    mat3 = np.matmul(mat3, np.transpose(g))  # (GT * G)^-1 * G
+    mat2 = np.matmul(np.transpose(g), g)  # GT * G
+    mat2 = np.linalg.inv(mat2)  # (GT * G)^-1
+    mat2 = np.matmul(mat2, np.transpose(g))  # (GT * G)^-1 * G
 
-    return mat1 - np.matmul(e_matrix, mat3)
+    return mat1 - np.matmul(e_matrix, mat2)
 
 
-def n(graphe, edge_to_compute):
-    """Find the point useful to compute a new edge (see schema of paper)"""
-    v1, v2 = edge_to_compute
-    liste = [v1, v2]
+def n(graphe, edge):
+    """Find the point useful to compute a new edge (see schema of paper).
+
+    Args:
+        graphe: Graphe representing the polyline.
+        edge: The edge we want to find the associated points.
+
+    Returns:
+        vertices_list: A list of vertices associated to edge, useful to compute the new coordinates of a point.
+    """
+    v1, v2 = edge
+    vertices_list = [v1, v2]
     for neighbour in graphe.adj[v1]:
         if neighbour in graphe.adj[v2]:
-            liste.append(neighbour)
-            if len(liste) == 4:
+            vertices_list.append(neighbour)
+            if len(vertices_list) == 4:
                 # Enough points
-                return liste
+                return vertices_list
 
-    return liste
+    return vertices_list
 
 
 def compute_g(graphe, vertices):
-    """Compute the matrix G associated to the vertices vertices_list"""
+    """Compute the matrix G associated to the vertices vertices_list.
+
+    Args:
+        graphe:
+        vertices:
+    """
     gk_list = []
     for vertex in vertices:
         vx = graphe.nodes[vertex]['pos'][0]
