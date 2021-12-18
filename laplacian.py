@@ -178,7 +178,7 @@ def compute_a1_b1(graph, handles, w):
         a1.append(l1)
         a1.append(l2)
 
-        # Add two lines to matrix    b
+        # Add two lines to matrix b
         b.append(w * graph.nodes[p]['pos'][0])
         b.append(w * graph.nodes[p]['pos'][1])
 
@@ -302,11 +302,12 @@ def compute_new_points(handles, w):
     b_x = np.matmul(np.transpose(a2), b2_x)
     b_y = np.matmul(np.transpose(a2), b2_y)
 
-    # TODO : Erreur 'Numpy error: Matrix is singular' -> matrice pas inversible = pas unique solution
-    vx = np.linalg.solve(a, b_x)
-    vy = np.linalg.solve(a, b_y)
+    # TODO : Erreur 'Numpy error: Matrix is singular' -> matrice pas inversible = pas unique solution (trouver bug
+    #  pour remettre solve à a place de lstsq)
+    vx = np.linalg.lstsq(a, b_x)
+    vy = np.linalg.lstsq(a, b_y)
     return vx, vy
 
 
 if __name__ == '__main__':
-    vx_array, vy_array = compute_new_points([1, 2], 1000)
+    vx_array, vy_array = compute_new_points([1, 2, 3], 1000)
