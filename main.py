@@ -30,7 +30,6 @@ def parametres():
 
 def main():
     option, args = parametres()
-    print("\nTo switch from the SELECT mode to the MOVE mode, push 'S' or click on the colored cirlces (RED & GREEN) !\n")
     if len(sys.argv) == 1:
         data = Data(option.PATH)
     else:
