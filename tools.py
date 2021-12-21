@@ -101,7 +101,6 @@ def dist_seg(pos, segment):
     m = np.array([[-a, 1], [-ap, 1]])
     n = np.array([b, bp])
     x = np.linalg.solve(m,n)
-    print("intersection : {}, distance : {}\n".format(x, distance(pos, x)))
     return distance(pos, x), x
 
 def nearest_seg(points, seg, pos):
