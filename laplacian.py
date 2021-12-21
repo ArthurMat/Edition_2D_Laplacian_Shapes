@@ -3,67 +3,93 @@ import numpy as np
 from triangulate import *
 
 
-def load_polyfile(filename):
-    """Load the polyfile of the file filename and return the associated graph"""
-    verts, edges = get_datas(filename)
+def load_polyline(f_name):
+    """Load the polyline of the file f_name and return the associated graph.
+
+    Args:
+        f_name: name of the file to load.
+
+    Returns:
+        graph: A network object representing the graph of the polyline.
+    """
+    vertices, edges = get_datas(f_name)
     graph = nx.Graph()
 
-    for i, position in enumerate(verts):
+    # Create vertices
+    for i, position in enumerate(vertices):
         graph.add_node(i, pos=position)
 
+    # Create edges
     for e in edges:
-        graph.add_edge(*e)
+        graph.add_edge(e[0] - 1, e[1] - 1)  # We subtract 1 because index of vertex start to 1 instead of 0
 
     return graph
 
 
 def compute_h(g, e_matrix):
-    """Compute H for an edge e (e_matrix) associated to the matrix g"""
+    """Compute H for an edge e associated to the matrix e_matrix and g.
+
+    Args:
+        g: Numpy matrix g associated to an edge e.
+        e_matrix: Numpy matrix [[ekx eky], [eky −ekx]] associated to an edge e.
+
+    Returns:
+        h: Matrix h associated to an edge e.
+    """
     mat1 = np.array([[-1, 0, 1, 0, 0, 0, 0, 0],
                      [0, -1, 0, 1, 0, 0, 0, 0]])
 
-    mat3 = np.matmul(np.transpose(g), g)  # GT * G
-    mat3 = np.linalg.inv(mat3)  # (GT * G)^-1
-    mat3 = np.matmul(mat3, np.transpose(g))  # (GT * G)^-1 * G
+    mat2 = np.matmul(np.transpose(g), g)  # GT * G
+    mat2 = np.linalg.inv(mat2)  # (GT * G)^-1
+    mat2 = np.matmul(mat2, np.transpose(g))  # (GT * G)^-1 * G
 
-    return mat1 - np.matmul(e_matrix, mat3)
-
-
-def n(graphe, edge_to_compute):
-    """Find the point useful to compute a new edge (see schema of paper)"""
-    v1, v2 = edge_to_compute
-    liste = [v1, v2]
-    for neighbour in graphe.adj[v1]:
-        if neighbour in graphe.adj[v2]:
-            liste.append(neighbour)
-            if len(liste) == 4:
-                return liste
-
-    return liste
+    return mat1 - np.matmul(e_matrix, mat2)
 
 
-handles = [1, 2]
+def n(graph, edge):
+    """Find the point useful to compute a new edge (see schema of paper).
 
-#  Récupérer les points à modifier
-graphe_polyfile = load_polyfile("A")
+    Args:
+        graph: Networkx graph representing the polyline.
+        edge: Tuple with the index of the vertices of the edge we want to find the associated points.
 
-# Créer un nouveau gk avec les points à modifier
-new_graph = graphe_polyfile.subgraph(graphe_polyfile.nodes)
+    Returns:
+        vertices_list: A list of vertices associated to edge, useful to compute the new coordinates of a point.
+    """
+    v1, v2 = edge
+    vertices_list = [v1, v2]
+    for neighbour in graph.adj[v1]:
+        if neighbour in graph.adj[v2]:
+            vertices_list.append(neighbour)
+            if len(vertices_list) == 4:
+                # Enough points
+                return vertices_list
+
+    return vertices_list
 
 
-def compute_g(graphe, vertices_list):
-    """Compute the matrix G associated to the vertices vertices_list"""
+def compute_g(graph, vertices):
+    """Compute the matrix G associated to the vertices vertices_list.
+
+    Args:
+        graph: Graph representing the polyline.
+        vertices: List of index of the vertices in the graph we want to use to compute G.
+
+    Returns:
+        g: A (8,2) numpy matrix representing G.
+    """
     gk_list = []
-    for vertex in vertices_list:
-        vx = graphe.nodes[vertex]['pos'][0]
-        vy = graphe.nodes[vertex]['pos'][1]
+    for vertex in vertices:
+        vx = graph.nodes[vertex]['pos'][0]
+        vy = graph.nodes[vertex]['pos'][1]
 
         gk_list.append(vx)
         gk_list.append(vy)
         gk_list.append(vy)
         gk_list.append(-vx)
 
-    if len(vertices_list) == 3:
+    if len(vertices) == 3:
+        # We are on the border of the polyline : we add a null point
         gk_list.append(0)
         gk_list.append(0)
         gk_list.append(0)
@@ -72,27 +98,36 @@ def compute_g(graphe, vertices_list):
     return np.array(gk_list).reshape((8, 2))
 
 
-def compute_a1_b1(w):
+def compute_a1_b1(graph, handles, w):
+    """Compute A1 and b1 for the first step of the laplacian edition of the graph with the parameter w.
+
+    Args:
+        graph: Network graph representing the polyline.
+        handles: List of the index of the vertices of the polyline which are the constraints to compute
+        the new coordinates.
+        w: Int which is the weight used to compute the new coordinates of the polyline.
+
+    Returns:
+        (a1, b): Tuple of two numpy matrix representing a1 and b1 (used to compute first step of laplacian editing).
+    """
     a1 = []
     b = []
 
-    for edge in new_graph.edges:
-        l1 = [0 for i in range(len(new_graph.nodes) * 2)]
-        l2 = [0 for i in range(len(new_graph.nodes) * 2)]
+    for edge in graph.edges:
+        l1 = [0 for _ in range(len(graph.nodes) * 2)]
+        l2 = [0 for _ in range(len(graph.nodes) * 2)]
 
         # Compute Gk
-        vertices = n(graphe_polyfile, edge)
-        gk = compute_g(graphe_polyfile, vertices)
-
-        vl = vertices[2]
+        vertices = n(graph, edge)
+        gk = compute_g(graph, vertices)
 
         # Compute ek_matrix
-        vi, vj = np.array(graphe_polyfile.nodes[edge[0]]['pos']), np.array(graphe_polyfile.nodes[edge[1]]['pos'])
+        vi, vj = np.array(graph.nodes[edge[0]]['pos']), np.array(graph.nodes[edge[1]]['pos'])
         ek = vj - vi
         ekx, eky = ek[0], ek[1]
         ek_matrix = np.array([ekx, eky, eky, -ekx]).reshape((2, 2))
 
-        # Comput h
+        # Compute h
         h = compute_h(gk, ek_matrix)
 
         i, j, l = vertices[0], vertices[1], vertices[2]
@@ -124,60 +159,69 @@ def compute_a1_b1(w):
             l2[r * 2] = h[1][6]
             l2[r * 2 + 1] = h[1][7]
 
-        # Add tow ligne to matrix a
+        # Add two line to matrix a
         a1.append(l1)
         a1.append(l2)
 
-        # Add tow 0 in matrix b
+        # Add two 0 in matrix b
         b.append(0)
         b.append(0)
 
     for p in handles:
-        l1 = [0 for i in range(len(new_graph.nodes) * 2)]
-        l2 = [0 for i in range(len(new_graph.nodes) * 2)]
+        l1 = [0 for _ in range(len(graph.nodes) * 2)]
+        l2 = [0 for _ in range(len(graph.nodes) * 2)]
 
         l1[2*p] = w
         l2[2*p+1] = w
 
-        # Add tow ligne to matrix a
+        # Add two lines to matrix a
         a1.append(l1)
         a1.append(l2)
 
-        # Add tow ligne to matrix    b
-        b.append(w * graphe_polyfile.nodes[p][0])
-        b.append(w * graphe_polyfile.nodes[p][1])
+        # Add two lines to matrix b
+        b.append(w * graph.nodes[p]['pos'][0])
+        b.append(w * graph.nodes[p]['pos'][1])
 
     return np.array(a1), np.transpose(np.array(b))
 
 
-def compute_a2_b2(w, vprime):
+def compute_a2_b2(graph, handles, v_prime, w):
+    """Compute A2 and b2 for the second step of the laplacian edition of the graph with the parameter w.
+
+    Args:
+        graph: Network graph representing the polyline.
+        handles: List of the index of the vertices of the polyline which are the constraints to compute
+        the new coordinates.
+        v_prime: New coordinates of vertices after first step.
+        w: Int which is the weight used to compute the new coordinates of the polyline.
+
+    Returns:
+        (a2, b2_x, b2_y): Tuple of three numpy matrix representing a2 and b2 (x and y coordinates).
+    """
     a2 = []
     b2_x = []
     b2_y = []
 
-    for edge in new_graph.edges:
-        l1 = [0 for i in range(len(new_graph.nodes) * 2)]
+    for edge in graph.edges:
+        l1 = [0 for _ in range(len(graph.nodes) * 2)]
 
         # Compute Gk
-        vertices = n(graphe_polyfile, edge)
-        gk = compute_g(vertices)
-
-        vl = vertices[3]
+        vertices = n(graph, edge)
+        gk = compute_g(graph, vertices)
 
         # Compute ek_matrix
-        vi, vj = np.array(edge[0]), np.array(edge[1])
+        i, j, l = vertices[0], vertices[1], vertices[2]
+        vi, vj = np.array(graph.nodes[edge[0]]['pos']), np.array(graph.nodes[edge[1]]['pos'])
         ek = vj - vi
-        ekx, eky = ek[0], ek[1]
-        ek_matrix = np.array([ekx, eky, eky, -ekx]).reshape((2, 2))
 
-        vi = (vprime[2 * vi], vprime[2 * vi + 1])
-        vj = (vprime[2 * vj], vprime[2 * vj + 1])
-        vl = (vprime[2 * vl], vprime[2 * vl + 1])
+        vi = (v_prime[2 * i], v_prime[2 * i + 1])
+        vj = (v_prime[2 * j], v_prime[2 * j + 1])
+        vl = (v_prime[2 * l], v_prime[2 * l + 1])
 
         if len(vertices) == 4:
             # Not a border
-            vr = vertices[4]
-            vr = (vprime[2 * vr], vprime[2 * vr + 1])
+            r = vertices[3]
+            vr = (v_prime[2 * r], v_prime[2 * r + 1])
         else:
             vr = (0, 0)
 
@@ -185,39 +229,85 @@ def compute_a2_b2(w, vprime):
                        vl[0], vl[1], vr[0], vr[1]]
         coordinates = np.transpose(np.array(coordinates))
 
-        # on calcul Gkt * Gk
+        # Compute Gkt * Gk
         mat3 = np.matmul(np.transpose(gk), gk)
-        # on calcul (Gkt*Gk)-1
+        # Compute (Gkt*Gk)-1
         mat3 = np.linalg.inv(mat3)
-        # on calcul mat3 [ck, sk]
+        # Compute mat3 [ck, sk]
         mat3 = np.matmul(mat3, np.transpose(gk))
         mat3 = np.transpose(np.matmul(mat3, coordinates))
         ck = mat3[0]
         sk = mat3[1]
 
-        # on calcul Tk
+        # Compute Tk
         a = 1 / (ck ** 2 + sk ** 2)
         tk = [[a * ck, a * sk],
               [-a * sk, a * ck]]
 
-        # Calcul de A2
-        # on veut calculer vi''-vj'' - T'i edge_k
-        l1[vi] = -1  # vi''
-        l1[vj] = 1  # -vj''
+        # Compute a2
+        # We want to compute vi''-vj'' - T'i edge_k
+        l1[i] = -1  # vi''
+        l1[j] = 1  # -vj''
 
-        # on ajoute la ligne dans A2
+        # Add a line in a2
         a2.append(l1)
 
-        # calcul de b
+        # Compute b
         # edge_k [ekx,
-        #    eky]
-        ek = np.transpose(np.array(ek))
-        # b = Tkek
+        #         eky]
+        ek = np.transpose(ek)
+        # b = Tk * ek
         ek = np.transpose(np.matmul(tk, ek))
-        # on ajoute dans b2_x et b2_y
+        # We add b2_x and b2_y
         b2_x.append(ek[0])
         b2_y.append(ek[1])
 
+    # Now we deal with the handles points
+    for p in handles:
+        l1 = [0 for _ in range(len(graph.nodes) * 2)]
+        l1[p] = w
+
+        a2.append(l1)
+
+        b2_x.append(w * graph.nodes[p]['pos'][0])
+        b2_y.append(w * graph.nodes[p]['pos'][1])
+
+    return np.array(a2), np.array(b2_x), np.array(b2_y)
+
+
+def compute_new_points(handles, w):
+    """ Compute the new coordinates of a polyline after moving some points.
+
+    Args:
+        handles: The points that moved.
+        w: Weight use to compute new coordinates.
+
+    Returns: (vx, vy) a tuple of two numpy vector which are the new coordinates of the points.
+
+    """
+    #  We get the point to modify
+    graph_polyline = load_polyline("A")
+    for i in handles:
+        graph_polyline.nodes[i]['pos'][0] = graph_polyline.nodes[i]['pos'][0] + 0.01
+    a1, b1 = compute_a1_b1(graph_polyline, handles, w)
+    a = np.matmul(np.transpose(a1), a1)
+    b = np.matmul(np.transpose(a1), b1)
+
+    # We solve the first equation
+    v_prime = np.linalg.solve(a, b)
+
+    # And now we will solve the second
+    a2, b2_x, b2_y = compute_a2_b2(graph_polyline, handles, v_prime, w)
+    a = np.matmul(np.transpose(a2), a2)
+    b_x = np.matmul(np.transpose(a2), b2_x)
+    b_y = np.matmul(np.transpose(a2), b2_y)
+
+    # TODO : Erreur 'Numpy error: Matrix is singular' -> matrice pas inversible = pas unique solution (trouver bug
+    #  pour remettre solve à a place de lstsq)
+    vx = np.linalg.lstsq(a, b_x)
+    vy = np.linalg.lstsq(a, b_y)
+    return vx, vy
+
 
 if __name__ == '__main__':
-    compute_a1_b1(1000)
+    vx_array, vy_array = compute_new_points([1, 2, 3], 1000)
