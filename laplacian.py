@@ -203,7 +203,7 @@ def compute_a2_b2(graph, handles, v_prime, w):
     b2_y = []
 
     for edge in graph.edges:
-        l1 = [0 for _ in range(len(graph.nodes) * 2)]
+        l1 = [0 for _ in range(len(graph.nodes))]
 
         # Compute Gk
         vertices = n(graph, edge)
@@ -235,7 +235,7 @@ def compute_a2_b2(graph, handles, v_prime, w):
         mat3 = np.linalg.inv(mat3)
         # Compute mat3 [ck, sk]
         mat3 = np.matmul(mat3, np.transpose(gk))
-        mat3 = np.transpose(np.matmul(mat3, coordinates))
+        mat3 = np.matmul(mat3, coordinates)
         ck = mat3[0]
         sk = mat3[1]
 
@@ -264,7 +264,7 @@ def compute_a2_b2(graph, handles, v_prime, w):
 
     # Now we deal with the handles points
     for p in handles:
-        l1 = [0 for _ in range(len(graph.nodes) * 2)]
+        l1 = [0 for _ in range(len(graph.nodes))]
         l1[p] = w
 
         a2.append(l1)
@@ -301,11 +301,9 @@ def compute_new_points(handles, w):
     a = np.matmul(np.transpose(a2), a2)
     b_x = np.matmul(np.transpose(a2), b2_x)
     b_y = np.matmul(np.transpose(a2), b2_y)
-
-    # TODO : Erreur 'Numpy error: Matrix is singular' -> matrice pas inversible = pas unique solution (trouver bug
-    #  pour remettre solve à a place de lstsq)
-    vx = np.linalg.lstsq(a, b_x)
-    vy = np.linalg.lstsq(a, b_y)
+    
+    vx = np.linalg.solve(a, b_x)
+    vy = np.linalg.solve(a, b_y)
     return vx, vy
 
 

@@ -31,7 +31,7 @@ def get_lines(filename, func):
 
 
 def get_datas(filename):
-    """Renvoei la liste des sommets et des segments asssociés à une triangulation de fichier"""
+    """Renvoie la liste des sommets et des segments asssociés à une triangulation de fichier"""
     vertices = []
     segments = []
 
@@ -62,11 +62,11 @@ def get_datas(filename):
     for i in range(1, nb_segments + 1):
         v1, v2, v3 = lines_int[i][1], lines_int[i][2], lines_int[i][3]
 
-        if [v1, v2] not in segments:
+        if [v1, v2] not in segments and [v2, v1] not in segments:
             segments.append([v1, v2])
-        if [v2, v3] not in segments:
+        if [v2, v3] not in segments and [v3, v2] not in segments:
             segments.append([v2, v3])
-        if [v3, v1] not in segments:
+        if [v3, v1] not in segments and [v1, v3] not in segments:
             segments.append([v3, v1])
         
     return vertices, segments
