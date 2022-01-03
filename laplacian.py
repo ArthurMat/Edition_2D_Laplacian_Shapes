@@ -75,7 +75,7 @@ def compute_g(graph, vertices):
     return np.array(gk_list).reshape((8, 2))
 
 
-def compute_a1_b1(graph, handles, w):
+def compute_a1_b1(graph, handles, handles_coord, w):
     """Compute A1 and b1 for the first step of the laplacian edition of the graph with the parameter w.
 
     Args:
@@ -156,13 +156,13 @@ def compute_a1_b1(graph, handles, w):
         a1.append(l2)
 
         # Add two lines to matrix b
-        b.append(w * graph.nodes[p]['pos'][0])
-        b.append(w * graph.nodes[p]['pos'][1])
+        b.append(w * handles_coord[0])
+        b.append(w * handles_coord[1])
 
     return np.array(a1), np.transpose(np.array(b))
 
 
-def compute_a2_b2(graph, handles, v_prime, w):
+def compute_a2_b2(graph, handles, handles_coord, v_prime, w):
     """Compute A2 and b2 for the second step of the laplacian edition of the graph with the parameter w.
 
     Args:
@@ -246,19 +246,21 @@ def compute_a2_b2(graph, handles, v_prime, w):
 
         a2.append(l1)
 
-        b2_x.append(w * graph.nodes[p]['pos'][0])
-        b2_y.append(w * graph.nodes[p]['pos'][1])
+        b2_x.append(w * handles_coord[0])
+        b2_y.append(w * handles_coord[1])
+
 
     return np.array(a2), np.array(b2_x), np.array(b2_y)
 
 
-def compute_new_points(vertices, edges, handles, w=1000):
+def compute_new_points(vertices, edges, handles, handles_coord, w=1000):
     """ Compute the new coordinates of a polyline after moving some points.
 
     Args:
-        vertices: A list with the coordinates of the vertices.
+        vertices: A dict with the coordinates of the vertices.
         edges: A dict with the keys of the vertices which are linked.
         handles: The points that moved.
+        handles_coord: New coordinates of the points that was moved.
         w: Weight used to compute new coordinates.
 
     Returns: new_vertices a list with the new coordinates of the vertices.
@@ -274,9 +276,7 @@ def compute_new_points(vertices, edges, handles, w=1000):
     for e in edges.values():
         graph_polyline.add_edge(e[0]-1, e[1]-1)  # We subtract 1 because index of vertex start to 1 instead of 0
 
-    for i in handles:
-        graph_polyline.nodes[i]['pos'][0] = graph_polyline.nodes[i]['pos'][0] + 0.01
-    a1, b1 = compute_a1_b1(graph_polyline, handles, w)
+    a1, b1 = compute_a1_b1(graph_polyline, handles, handles_coord, w)
     a = np.matmul(np.transpose(a1), a1)
     b = np.matmul(np.transpose(a1), b1)
 
@@ -284,7 +284,7 @@ def compute_new_points(vertices, edges, handles, w=1000):
     v_prime = np.linalg.solve(a, b)
 
     # And now we will solve the second
-    a2, b2_x, b2_y = compute_a2_b2(graph_polyline, handles, v_prime, w)
+    a2, b2_x, b2_y = compute_a2_b2(graph_polyline, handles, handles_coord, v_prime, w)
     a = np.matmul(np.transpose(a2), a2)
     b_x = np.matmul(np.transpose(a2), b2_x)
     b_y = np.matmul(np.transpose(a2), b2_y)
