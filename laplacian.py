@@ -246,8 +246,8 @@ def compute_a2_b2(graph, handles, handles_coord, v_prime, w):
 
         a2.append(l1)
 
-        b2_x.append(w * handles_coord[0])
-        b2_y.append(w * handles_coord[1])
+        b2_x.append(w * handles_coord[p][0])
+        b2_y.append(w * handles_coord[p][1])
 
 
     return np.array(a2), np.array(b2_x), np.array(b2_y)
@@ -266,6 +266,11 @@ def compute_new_points(vertices, edges, handles, handles_coord, w=1000):
     Returns: new_vertices a list with the new coordinates of the vertices.
 
     """
+    # Start from 0 instead of 1
+    new_handles = []
+    for i in range(len(handles)):
+        new_handles.append(handles[i] - 1)
+
     graph_polyline = nx.Graph()
 
     # Create vertices
@@ -276,7 +281,7 @@ def compute_new_points(vertices, edges, handles, handles_coord, w=1000):
     for e in edges.values():
         graph_polyline.add_edge(e[0]-1, e[1]-1)  # We subtract 1 because index of vertex start to 1 instead of 0
 
-    a1, b1 = compute_a1_b1(graph_polyline, handles, handles_coord, w)
+    a1, b1 = compute_a1_b1(graph_polyline, new_handles, handles_coord, w)
     a = np.matmul(np.transpose(a1), a1)
     b = np.matmul(np.transpose(a1), b1)
 
@@ -284,7 +289,7 @@ def compute_new_points(vertices, edges, handles, handles_coord, w=1000):
     v_prime = np.linalg.solve(a, b)
 
     # And now we will solve the second
-    a2, b2_x, b2_y = compute_a2_b2(graph_polyline, handles, handles_coord, v_prime, w)
+    a2, b2_x, b2_y = compute_a2_b2(graph_polyline, new_handles, handles_coord, v_prime, w)
     a = np.matmul(np.transpose(a2), a2)
     b_x = np.matmul(np.transpose(a2), b2_x)
     b_y = np.matmul(np.transpose(a2), b2_y)
