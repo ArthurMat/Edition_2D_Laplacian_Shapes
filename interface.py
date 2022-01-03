@@ -135,7 +135,7 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                     for k in data.liste_cercles:
                         old_coords.append(data.points[k])
                     arr = move2(data.save_points[-1][0], data.seg, data.liste_cercles, old_coords)
-                    data.point = array_to_dict(arr)
+                    data.points = array_to_dict(arr)
                 update(screen, data, mode, item, seg_proche)
                 mousedrag = False
                 mouse_down = False

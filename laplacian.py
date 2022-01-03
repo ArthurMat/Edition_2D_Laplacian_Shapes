@@ -148,8 +148,8 @@ def compute_a1_b1(graph, handles, handles_coord, w):
         l1 = [0 for _ in range(len(graph.nodes) * 2)]
         l2 = [0 for _ in range(len(graph.nodes) * 2)]
 
-        l1[2*p] = w
-        l2[2*p+1] = w
+        l1[2 * (p - 1)] = w
+        l2[2 * (p - 1) + 1] = w
 
         # Add two lines to matrix a
         a1.append(l1)
@@ -242,7 +242,7 @@ def compute_a2_b2(graph, handles, handles_coord, v_prime, w):
     # Now we deal with the handles points
     for i, p in enumerate(handles):
         l1 = [0 for _ in range(len(graph.nodes))]
-        l1[p] = w
+        l1[p - 1] = w
 
         a2.append(l1)
 
