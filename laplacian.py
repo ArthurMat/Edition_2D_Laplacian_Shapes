@@ -257,7 +257,7 @@ def compute_new_points(vertices, edges, handles, w=1000):
 
     Args:
         vertices: A list with the coordinates of the vertices.
-        edges: A list with the keys of the vertices which are linked.
+        edges: A dict with the keys of the vertices which are linked.
         handles: The points that moved.
         w: Weight used to compute new coordinates.
 
@@ -271,7 +271,7 @@ def compute_new_points(vertices, edges, handles, w=1000):
         graph_polyline.add_node(i, pos=position)
 
     # Create edges
-    for e in edges:
+    for e in edges.values():
         graph_polyline.add_edge(e[0], e[1])  # We subtract 1 because index of vertex start to 1 instead of 0
 
     for i in handles:
