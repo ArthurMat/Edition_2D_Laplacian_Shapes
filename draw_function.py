@@ -32,8 +32,8 @@ def move(points, liste_cercles, pos, pos2):
         points[key][0] += dx
         points[key][1] += dy
 
-def move2(points, seg, liste_cercles, old_coords):
-    arr = compute_new_points(points, seg, liste_cercles, old_coords, w=1000)
+def move2(points, seg, handles, old_coords):
+    arr = compute_new_points(points, seg, handles, old_coords, w=1000)
     return arr
 
 
