@@ -156,8 +156,8 @@ def compute_a1_b1(graph, handles, handles_coord, w):
         a1.append(l2)
 
         # Add two lines to matrix b
-        b.append(w * handles_coord[0])
-        b.append(w * handles_coord[1])
+        b.append(w * handles_coord[p][0])
+        b.append(w * handles_coord[p][1])
 
     return np.array(a1), np.transpose(np.array(b))
 
