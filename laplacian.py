@@ -3,29 +3,6 @@ import numpy as np
 from triangulate import *
 
 
-def load_polyline(f_name):
-    """Load the polyline of the file f_name and return the associated graph.
-
-    Args:
-        f_name: name of the file to load.
-
-    Returns:
-        graph: A network object representing the graph of the polyline.
-    """
-    vertices, edges = get_datas(f_name)
-    graph = nx.Graph()
-
-    # Create vertices
-    for i, position in enumerate(vertices):
-        graph.add_node(i, pos=position)
-
-    # Create edges
-    for e in edges:
-        graph.add_edge(e[0] - 1, e[1] - 1)  # We subtract 1 because index of vertex start to 1 instead of 0
-
-    return graph
-
-
 def compute_h(g, e_matrix):
     """Compute H for an edge e associated to the matrix e_matrix and g.
 
@@ -275,18 +252,28 @@ def compute_a2_b2(graph, handles, v_prime, w):
     return np.array(a2), np.array(b2_x), np.array(b2_y)
 
 
-def compute_new_points(handles, w):
+def compute_new_points(vertices, edges, handles, w=1000):
     """ Compute the new coordinates of a polyline after moving some points.
 
     Args:
+        vertices: A list with the coordinates of the vertices.
+        edges: A list with the keys of the vertices which are linked.
         handles: The points that moved.
         w: Weight use to compute new coordinates.
 
-    Returns: (vx, vy) a tuple of two numpy vector which are the new coordinates of the points.
+    Returns: new_vertices a list with the new coordinates of the vertices.
 
     """
-    #  We get the point to modify
-    graph_polyline = load_polyline("A")
+    graph_polyline = nx.Graph()
+
+    # Create vertices
+    for i, position in enumerate(vertices):
+        graph_polyline.add_node(i, pos=position)
+
+    # Create edges
+    for e in edges:
+        graph_polyline.add_edge(e[0] - 1, e[1] - 1)  # We subtract 1 because index of vertex start to 1 instead of 0
+
     for i in handles:
         graph_polyline.nodes[i]['pos'][0] = graph_polyline.nodes[i]['pos'][0] + 0.01
     a1, b1 = compute_a1_b1(graph_polyline, handles, w)
@@ -304,8 +291,7 @@ def compute_new_points(handles, w):
     
     vx = np.linalg.solve(a, b_x)
     vy = np.linalg.solve(a, b_y)
-    return vx, vy
 
+    new_vertices = [[new_x, new_y] for new_x, new_y in zip(vx, vy)]
 
-if __name__ == '__main__':
-    vx_array, vy_array = compute_new_points([1, 2, 3], 1000)
+    return new_vertices
