@@ -293,5 +293,5 @@ def compute_new_points(vertices, edges, handles, handles_coord, w=1000):
     vy = np.linalg.solve(a, b_y)
 
     new_vertices = [[new_x, new_y] for new_x, new_y in zip(vx, vy)]
-    print(new_vertices)
+    
     return new_vertices
