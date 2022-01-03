@@ -114,3 +114,14 @@ def nearest_seg(points, seg, pos):
                 near = key
                 dist_min = dist
     return near
+
+def dico_cleaner(dico):
+    result = dict()
+    cptr = 0
+    for k in dico.keys():
+        if dico[k] in result.values() or [dico[k][1], dico[k][0]] in result.values():
+            continue
+        else:
+            cptr += 1
+            result[cptr] = dico[k]
+    return result
