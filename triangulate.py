@@ -7,7 +7,7 @@ import sys
 def triangulate(filename):
     """Crée une triangulation de Delaunay sous contrainte avec une aire maximum de 0.01 (argument de -a)"""
 
-    return_code = subprocess.call(["./triangle", "-a.01", filename])
+    return_code = subprocess.call(["./triangle", "-a5", filename])
 
     if return_code != 0:
         print("Erreur dans la triangulation")

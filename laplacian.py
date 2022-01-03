@@ -8,7 +8,7 @@ def compute_h(g, e_matrix):
 
     Args:
         g: Numpy matrix g associated to an edge e.
-        e_matrix: Numpy matrix [[ekx eky], [eky −ekx]] associated to an edge e.
+        e_matrix: Numpy matrix [[ekx eky], [eky -ekx]] associated to an edge e.
 
     Returns:
         h: Matrix h associated to an edge e.
@@ -90,7 +90,9 @@ def compute_a1_b1(graph, handles, handles_coord, w):
     a1 = []
     b = []
 
-    for edge in graph.edges:, pos, pos2
+    for edge in graph.edges:
+        l1 = [0 for _ in range(len(graph.nodes) * 2)]
+        l2 = [0 for _ in range(len(graph.nodes) * 2)]
 
         # Compute Gk
         vertices = n(graph, edge)
@@ -142,7 +144,7 @@ def compute_a1_b1(graph, handles, handles_coord, w):
         b.append(0)
         b.append(0)
 
-    for p in handles:
+    for i, p in enumerate(handles):
         l1 = [0 for _ in range(len(graph.nodes) * 2)]
         l2 = [0 for _ in range(len(graph.nodes) * 2)]
 
@@ -154,8 +156,8 @@ def compute_a1_b1(graph, handles, handles_coord, w):
         a1.append(l2)
 
         # Add two lines to matrix b
-        b.append(w * handles_coord[0])
-        b.append(w * handles_coord[1])
+        b.append(w * handles_coord[i][0])
+        b.append(w * handles_coord[i][1])
 
     return np.array(a1), np.transpose(np.array(b))
 
@@ -238,14 +240,14 @@ def compute_a2_b2(graph, handles, handles_coord, v_prime, w):
         b2_y.append(ek[1])
 
     # Now we deal with the handles points
-    for p in handles:
+    for i, p in enumerate(handles):
         l1 = [0 for _ in range(len(graph.nodes))]
         l1[p - 1] = w
 
         a2.append(l1)
 
-        b2_x.append(w * handles_coord[0])
-        b2_y.append(w * handles_coord[1])
+        b2_x.append(w * handles_coord[i][0])
+        b2_y.append(w * handles_coord[i][1])
 
 
     return np.array(a2), np.array(b2_x), np.array(b2_y)
@@ -291,5 +293,5 @@ def compute_new_points(vertices, edges, handles, handles_coord, w=1000):
     vy = np.linalg.solve(a, b_y)
 
     new_vertices = [[new_x, new_y] for new_x, new_y in zip(vx, vy)]
-
+    
     return new_vertices
