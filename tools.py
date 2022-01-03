@@ -82,6 +82,12 @@ def array_to_dict(liste):
         dico[i+1] = elmt
     return dico
 
+def dict_to_array(dico):
+    arr = list()
+    for val in dico.values():
+        arr.append(val)
+    return arr
+
 def coeff_dir(pt1, pt2):
     if pt1[1] == pt2[1]:
         pt1[1] += 0.0001

@@ -130,6 +130,9 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                         k = len(data.seg.keys())
                         data.seg[k+1] = [data.liste_cercles[0], nearest]
                     data.liste_cercles = []
+                elif mouse_down and mode == 1:
+                    arr = move2(data.points, data.seg, data.liste_cercles, pos, pos2)
+                    data.point = array_to_dict(arr)
                 update(screen, data, mode, item, seg_proche)
                 mousedrag = False
                 mouse_down = False

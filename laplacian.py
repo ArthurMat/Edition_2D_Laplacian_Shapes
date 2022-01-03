@@ -267,12 +267,12 @@ def compute_new_points(vertices, edges, handles, w=1000):
     graph_polyline = nx.Graph()
 
     # Create vertices
-    for i, position in enumerate(vertices):
-        graph_polyline.add_node(i, pos=position)
+    for i, position in vertices.items():
+        graph_polyline.add_node(i-1, pos=position)
 
     # Create edges
     for e in edges.values():
-        graph_polyline.add_edge(e[0], e[1])  # We subtract 1 because index of vertex start to 1 instead of 0
+        graph_polyline.add_edge(e[0]-1, e[1]-1)  # We subtract 1 because index of vertex start to 1 instead of 0
 
     for i in handles:
         graph_polyline.nodes[i]['pos'][0] = graph_polyline.nodes[i]['pos'][0] + 0.01
@@ -293,5 +293,5 @@ def compute_new_points(vertices, edges, handles, w=1000):
     vy = np.linalg.solve(a, b_y)
 
     new_vertices = [[new_x, new_y] for new_x, new_y in zip(vx, vy)]
-
+    print(new_vertices)
     return new_vertices

@@ -5,6 +5,7 @@ import pygame
 from tools import *
 from copy import deepcopy
 from constant import *
+from laplacian import *
 
 def draw_poly(screen, points, seg, item, seg_proche):
     for key, value in seg.items():
@@ -30,6 +31,11 @@ def move(points, liste_cercles, pos, pos2):
     for key in liste_cercles:
         points[key][0] += dx
         points[key][1] += dy
+
+def move2(points, seg, liste_cercles, pos, pos2):
+    arr = compute_new_points(points, seg, liste_cercles, w=1000)
+    return arr
+
 
 def reset_button(screen, WIDTH, HEIGHT):
     pi = 3.14159265359
