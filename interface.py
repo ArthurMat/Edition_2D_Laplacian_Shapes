@@ -51,7 +51,7 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                     data.day = (data.day + 1) % 2
                 if (event.key == pygame.K_UP or event.key == pygame.K_DOWN) and mode > 1:
                     item = not item
-                if event.key == pygame.K_DELETE or event.key == pygame.K_BACKSPACE:
+                if (event.key == pygame.K_DELETE or event.key == pygame.K_BACKSPACE) and mode == 2:
                     if not item:  # Point
                         data.suppression()
                     else:  # Segment
@@ -97,8 +97,8 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                         if item:  # Segment
                             data.liste_cercles = [find_nearest(data.points, pos)]
                         else:  # Point
-                            k = len(data.points.keys())
-                            data.points[k+1] = [pos[0], pos[1]]
+                            data.indice_point +=1
+                            data.points[data.indice_point] = [pos[0], pos[1]]
                         update(screen, data, mode, item, seg_proche)
                 # Toolbar Event
                 else:
@@ -136,8 +136,8 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                 elif mouse_down and mode == 3 and item:
                     nearest = find_nearest(data.points, pos2)
                     if [data.liste_cercles[0], nearest] not in data.seg.values():
-                        k = len(data.seg.keys())
-                        data.seg[k+1] = [data.liste_cercles[0], nearest]
+                        data.indice_seg +=1
+                        data.seg[data.indice_seg] = [data.liste_cercles[0], nearest]
                     data.liste_cercles = []
                 elif mouse_down and mode == 1:
                     if len(data.liste_cercles) > 0:

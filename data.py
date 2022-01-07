@@ -20,6 +20,8 @@ class Data:
         self.liste_cercles = []
         self.save_points = []
         self.day = 0
+        self.indice_point = len(self.points.keys())
+        self.indice_seg = len(self.seg.keys())
 
     def transform(self):
         self.points = to_pygame(self.points, self.WIDTH, self.HEIGHT)
@@ -32,11 +34,13 @@ class Data:
 
     def suppression(self):
         cles_s = []
+        self.liste_cercles.sort(reverse = True)
         for k in self.liste_cercles:
             self.points.pop(k)
             for key, val in self.seg.items():
-                if k in val:
+                if k in val and key not in cles_s:
                     cles_s.append(key)
+        cles_s.sort(reverse = True)
         for k in cles_s:
             self.seg.pop(k)
         self.liste_cercles = []
@@ -53,3 +57,5 @@ class Data:
         self.save_points = []
         self.transform()
         self.redim()
+        self.indice_point = len(self.points.keys())
+        self.indice_seg = len(self.seg.keys())
