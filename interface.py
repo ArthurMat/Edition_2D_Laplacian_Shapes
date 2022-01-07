@@ -45,6 +45,9 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
             """Event Key Down"""
             if event.type == pygame.KEYDOWN:
                 mods = pygame.key.get_mods()
+                if event.key == pygame.K_p:
+                    print(data.points, end="\n\n")
+                    print(data.seg)
                 if event.key == pygame.K_s:
                     mode = (mode + 1) % 3
                 if event.key == pygame.K_n:
@@ -135,7 +138,7 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                     data.liste_cercles = select(data.points, pos, pos2)
                 elif mouse_down and mode == 3 and item:
                     nearest = find_nearest(data.points, pos2)
-                    if [data.liste_cercles[0], nearest] not in data.seg.values():
+                    if [data.liste_cercles[0], nearest] not in data.seg.values() and data.liste_cercles[0] != nearest:
                         data.indice_seg +=1
                         data.seg[data.indice_seg] = [data.liste_cercles[0], nearest]
                     data.liste_cercles = []
