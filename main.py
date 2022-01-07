@@ -19,7 +19,7 @@ def parametres():
                       dest="HEIGHT", default=750, type='int',
                       help="Vous permet de changer la heuteur de la fenetre\n")
     parser.add_option("-f", "-p", "--fichier", "--path",
-                      dest="PATH", default="test/a.poly", type='str',
+                      dest="PATH", default="test/bicycle_seat.poly", type='str',
                       help="Vous permet de changer le chemin du fichier utilisé (les prefixes ne sont pas obligatoires, ne rien mettre devant le chemin marche aussi)\n")
     (option, args) = parser.parse_args()
     if option.WIDTH < 0:

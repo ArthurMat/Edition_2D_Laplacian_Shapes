@@ -5,11 +5,9 @@ from triangulate import *
 
 def compute_h(g, e_matrix):
     """Compute H for an edge e associated to the matrix e_matrix and g.
-
     Args:
         g: Numpy matrix g associated to an edge e.
         e_matrix: Numpy matrix [[ekx eky], [eky -ekx]] associated to an edge e.
-
     Returns:
         h: Matrix h associated to an edge e.
     """
@@ -25,11 +23,9 @@ def compute_h(g, e_matrix):
 
 def n(graph, edge):
     """Find the point useful to compute a new edge (see schema of paper).
-
     Args:
         graph: Networkx graph representing the polyline.
         edge: Tuple with the index of the vertices of the edge we want to find the associated points.
-
     Returns:
         vertices_list: A list of vertices associated to edge, useful to compute the new coordinates of a point.
     """
@@ -47,11 +43,9 @@ def n(graph, edge):
 
 def compute_g(graph, vertices):
     """Compute the matrix G associated to the vertices vertices_list.
-
     Args:
         graph: Graph representing the polyline.
         vertices: List of index of the vertices in the graph we want to use to compute G.
-
     Returns:
         g: A (8,2) numpy matrix representing G.
     """
@@ -77,13 +71,11 @@ def compute_g(graph, vertices):
 
 def compute_a1_b1(graph, handles, handles_coord, w):
     """Compute A1 and b1 for the first step of the laplacian edition of the graph with the parameter w.
-
     Args:
         graph: Network graph representing the polyline.
         handles: List of the index of the vertices of the polyline which are the constraints to compute
         the new coordinates.
         w: Int which is the weight used to compute the new coordinates of the polyline.
-
     Returns:
         (a1, b): Tuple of two numpy matrix representing a1 and b1 (used to compute first step of laplacian editing).
     """
@@ -164,14 +156,12 @@ def compute_a1_b1(graph, handles, handles_coord, w):
 
 def compute_a2_b2(graph, handles, handles_coord, v_prime, w):
     """Compute A2 and b2 for the second step of the laplacian edition of the graph with the parameter w.
-
     Args:
         graph: Network graph representing the polyline.
         handles: List of the index of the vertices of the polyline which are the constraints to compute
         the new coordinates.
         v_prime: New coordinates of vertices after first step.
         w: Int which is the weight used to compute the new coordinates of the polyline.
-
     Returns:
         (a2, b2_x, b2_y): Tuple of three numpy matrix representing a2 and b2 (x and y coordinates).
     """
@@ -255,16 +245,13 @@ def compute_a2_b2(graph, handles, handles_coord, v_prime, w):
 
 def compute_new_points(vertices, edges, handles, handles_coord, w=1000):
     """ Compute the new coordinates of a polyline after moving some points.
-
     Args:
         vertices: A dict with the coordinates of the vertices.
         edges: A dict with the keys of the vertices which are linked.
         handles: The points that moved.
         handles_coord: New coordinates of the points that was moved.
         w: Weight used to compute new coordinates.
-
     Returns: new_vertices a list with the new coordinates of the vertices.
-
     """
     graph_polyline = nx.Graph()
 

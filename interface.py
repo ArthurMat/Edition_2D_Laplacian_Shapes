@@ -22,7 +22,7 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
     # data.points, data.seg = deepcopy(data.mesh_points), deepcopy(data.mesh_seg)
     # data.switch()
 
-    screen.fill(WHITE)
+    screen.fill(WHITE[data.day])
 
     pos = None
     mousedrag = False
@@ -47,6 +47,16 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                 mods = pygame.key.get_mods()
                 if event.key == pygame.K_s:
                     mode = (mode + 1) % 3
+                if event.key == pygame.K_n:
+                    data.day = (data.day + 1) % 2
+                if (event.key == pygame.K_UP or event.key == pygame.K_DOWN) and mode > 1:
+                    item = not item
+                if event.key == pygame.K_DELETE or event.key == pygame.K_BACKSPACE:
+                    if not item:  # Point
+                        data.suppression()
+                    else:  # Segment
+                        data.suppr_seg(seg_proche)
+                        seg_proche = None
                 if event.key == pygame.K_z and mods & pygame.KMOD_CTRL:
                     if len(data.save_points) > 0:
                         data.points = deepcopy(data.save_points[-1][0])
@@ -82,7 +92,6 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                     if mode == 2 and item:
                         data.liste_cercles = []
                         seg_proche = nearest_seg(data.points, data.seg, pos)
-                        print(data.seg)
                         update(screen, data, mode, item, seg_proche)
                     elif mode == 3:  # Ajout
                         if item:  # Segment

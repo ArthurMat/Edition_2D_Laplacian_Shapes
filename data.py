@@ -19,6 +19,7 @@ class Data:
         self.copy_points = deepcopy(self.points)
         self.liste_cercles = []
         self.save_points = []
+        self.day = 0
 
     def transform(self):
         self.points = to_pygame(self.points, self.WIDTH, self.HEIGHT)
