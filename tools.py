@@ -147,3 +147,14 @@ def dico_cleaner(dico):
             cptr += 1
             result[cptr] = dico[k]
     return result
+
+def write_file(data):
+    txt = ""
+    txt += "{} 2 1 0\n".format(data.indice_point)
+    for key, value in data.points.items():
+        txt += "{} {} {}\n".format(key, value[0], value[1])
+    txt += "\n{}\n".format(data.indice_seg)
+    for key, value in data.seg.items():
+        txt += "{} {} {}\n".format(key, value[0], value[1])
+    return txt
+    

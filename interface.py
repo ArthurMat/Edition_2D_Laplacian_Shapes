@@ -48,8 +48,6 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                 if event.key == pygame.K_p:
                     print(data.points, end="\n\n")
                     print(data.seg)
-                if event.key == pygame.K_s:
-                    mode = (mode + 1) % 3
                 if event.key == pygame.K_n:
                     data.day = (data.day + 1) % 2
                 if (event.key == pygame.K_UP or event.key == pygame.K_DOWN) and mode > 1:
@@ -60,6 +58,7 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                     else:  # Segment
                         data.suppr_seg(seg_proche)
                         seg_proche = None
+                    data.update_keys()
                 if event.key == pygame.K_z and mods & pygame.KMOD_CTRL:
                     if len(data.save_points) > 0:
                         data.points = deepcopy(data.save_points[-1][0])
@@ -73,6 +72,15 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                 if event.key == pygame.K_r and mods & pygame.KMOD_CTRL:
                     data.WIDTH, data.HEIGHT = screen.get_size()
                     data.reset()
+                if event.key == pygame.K_s:
+                    if mods & pygame.KMOD_CTRL:
+                        file = open("test/new_file.poly", "w")
+                        file.write(write_file(data))
+                        file.close()
+                    else:
+                        if mode == 3:
+                            mode -= 1
+                        mode = (mode + 1) % 3
                 update(screen, data, mode, item, seg_proche)
                 
             """Event Resize Window"""
@@ -125,6 +133,7 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                         else:  # Segment
                             data.suppr_seg(seg_proche)
                             seg_proche = None
+                        data.update_keys()
                     elif mode > 1 and data.WIDTH*0.45 + data.HEIGHT*0.11 <= pos[0] <= data.WIDTH*0.45 + data.HEIGHT*0.14:  # Gray Selector Point/Segment
                         item = not item
                     # elif data.WIDTH*0.75 - data.HEIGHT*0.02 <= pos[0] <= data.WIDTH*0.75 + data.HEIGHT*0.02 or data.WIDTH*0.75 + data.HEIGHT*0.04 <= pos[0] <= data.WIDTH*0.75 + data.HEIGHT*0.08:  # Orange Buttons Mesh
