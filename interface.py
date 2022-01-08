@@ -70,6 +70,9 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                         data.liste_cercles = []
                     elif mods & pygame.KMOD_CTRL:
                         data.liste_cercles = list(data.points.keys())
+                if event.key == pygame.K_r and mode & pygame.KMOD_CTRL:
+                    data.WIDTH, data.HEIGHT = screen.get_size()
+                    data.reset()
                 update(screen, data, mode, item, seg_proche)
                 
             """Event Resize Window"""
