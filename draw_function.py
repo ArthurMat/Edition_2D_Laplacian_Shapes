@@ -25,10 +25,10 @@ def select(points, pos, pos2):
         liste.append(cercle)
     return liste
 
-def move(points, liste_cercles, pos, pos2):
+def move(points, handles, pos, pos2):
     dx = (pos2[0] - pos[0]) / 1  # Gain
     dy = (pos2[1] - pos[1]) / 1  # Gain
-    for key in liste_cercles:
+    for key in handles:
         points[key][0] += dx
         points[key][1] += dy
 
@@ -67,11 +67,11 @@ def add_remove(screen, data, mode, item):
        [data.WIDTH*0.45 + data.HEIGHT*0.04, data.HEIGHT*0.045],
        [data.WIDTH*0.45 + data.HEIGHT*0.1, data.HEIGHT*0.045],
        [data.WIDTH*0.45 + data.HEIGHT*0.1, data.HEIGHT*0.005]]
-    if mode < 2:
+    if mode == 1:
         pygame.draw.circle(screen, color=BLUE_OFF, center=(data.WIDTH*0.45, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.02)
         pygame.draw.rect(screen, color=GRAY_OFF, rect=pygame.Rect(data.WIDTH*0.45 + data.HEIGHT*0.04, data.HEIGHT*0.005, data.HEIGHT*0.06, data.HEIGHT*0.04))
         pygame.draw.lines(screen, color=BLACK[0], closed=True, points=p, width=2)
-    else:
+    elif mode > 1:
         pygame.draw.circle(screen, color=LIGHT_BLUE, center=(data.WIDTH*0.45, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.02)
         pygame.draw.rect(screen, color=LIGHT_GRAY, rect=pygame.Rect(data.WIDTH*0.45 + data.HEIGHT*0.04, data.HEIGHT*0.005, data.HEIGHT*0.06, data.HEIGHT*0.04))
         pygame.draw.lines(screen, color=BLACK[0], closed=True, points=p, width=2)
@@ -89,6 +89,28 @@ def add_remove(screen, data, mode, item):
             pygame.draw.line(screen, color=BLACK[0], start_pos=[data.WIDTH*0.45 + data.HEIGHT*0.05, data.HEIGHT*0.025], end_pos=[data.WIDTH*0.45 + data.HEIGHT*0.09, data.HEIGHT*0.025], width=3)
         else:  # point
             pygame.draw.circle(screen, color=BLACK[0], center=(data.WIDTH*0.45 + data.HEIGHT*0.07, data.HEIGHT*0.025), radius=data.HEIGHT*0.015)
+    elif mode == 0:
+        pygame.draw.circle(screen, color=BLUE_OFF, center=(
+            data.WIDTH*0.45, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.02)
+        pygame.draw.rect(screen, color=LIGHT_GRAY, rect=pygame.Rect(
+            data.WIDTH*0.45 + data.HEIGHT*0.04, data.HEIGHT*0.005, data.HEIGHT*0.06, data.HEIGHT*0.04))
+        pygame.draw.lines(
+            screen, color=BLACK[0], closed=True, points=p, width=2)
+        pygame.draw.rect(screen, color=VERY_LIGHT_GRAY, rect=pygame.Rect(
+            data.WIDTH*0.45 + data.HEIGHT*0.11, data.HEIGHT*0.005, data.HEIGHT*0.03, data.HEIGHT*0.04))
+        pygame.draw.lines(screen, color=BLACK[0], closed=True, points=[[data.WIDTH*0.45 + data.HEIGHT*0.11, data.HEIGHT*0.005], [data.WIDTH*0.45 + data.HEIGHT *
+                          0.11, data.HEIGHT*0.045], [data.WIDTH*0.45 + data.HEIGHT*0.14, data.HEIGHT*0.045], [data.WIDTH*0.45 + data.HEIGHT*0.14, data.HEIGHT*0.005]], width=2)
+        pygame.draw.polygon(screen, color=BLACK[0], points=[[data.WIDTH*0.45 + data.HEIGHT*0.115, data.HEIGHT*0.02], [
+                            data.WIDTH*0.45 + data.HEIGHT*0.135, data.HEIGHT*0.02], [data.WIDTH*0.45 + data.HEIGHT*0.125, data.HEIGHT*0.01]])
+        pygame.draw.polygon(screen, color=BLACK[0], points=[[data.WIDTH*0.45 + data.HEIGHT*0.115, data.HEIGHT*0.03], [
+                            data.WIDTH*0.45 + data.HEIGHT*0.135, data.HEIGHT*0.03], [data.WIDTH*0.45 + data.HEIGHT*0.125, data.HEIGHT*0.04]])
+        if item:
+            pygame.draw.circle(screen, color=BLACK[0], center=(
+                data.WIDTH*0.45 + data.HEIGHT*0.07, data.HEIGHT*0.025), radius=data.HEIGHT*0.01)
+        else:  # point
+            pygame.draw.circle(screen, color=RED, center=(
+                data.WIDTH*0.45 + data.HEIGHT*0.07, data.HEIGHT*0.025), radius=data.HEIGHT*0.01)
+
 
 def update(screen, data, mode, item, seg_proche):
     # Screen
@@ -115,13 +137,11 @@ def update(screen, data, mode, item, seg_proche):
         pygame.draw.circle(screen, color=GREEN, center=(data.WIDTH*0.11, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.02)
         s(screen, data.WIDTH, data.HEIGHT, 0)
         m(screen, data.WIDTH, data.HEIGHT, 1)
-    # if data.load:
-    #     pygame.draw.circle(screen, color=ORANGE, center=(data.WIDTH*0.75, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.02)
-    #     pygame.draw.circle(screen, color=ORANGE_OFF, center=(data.WIDTH*0.75 + data.HEIGHT*0.06, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.02)
-    # else:
-    #     pygame.draw.circle(screen, color=ORANGE_OFF, center=(data.WIDTH*0.75, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.02)
-    #     pygame.draw.circle(screen, color=ORANGE, center=(data.WIDTH*0.75 + data.HEIGHT*0.06, data.HEIGHT*0.05/2), radius=data.HEIGHT*0.02)
     reset_button(screen, data)
     # Nodes
-    for key in data.liste_cercles:
-        pygame.draw.circle(screen, color=RED, center=data.points[key], radius=max(min(4, min(data.WIDTH, data.HEIGHT)* 0.009),1.75))
+    for key in data.handles:
+        pygame.draw.circle(screen, color=RED, center=data.points[key], radius=max(
+            min(4, min(data.WIDTH, data.HEIGHT) * 0.009), 1.75))
+    for key in data.fixes:
+        pygame.draw.circle(screen, color=BLACK[data.day], center=data.points[key], radius=max(
+            min(4, min(data.WIDTH, data.HEIGHT) * 0.009), 1.75))

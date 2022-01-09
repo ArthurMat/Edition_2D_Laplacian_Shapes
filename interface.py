@@ -30,7 +30,7 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
     seg_proche = None
     
     mode = 0      # 0=select, 1=move, 2=suppr, 3=add
-    item = False  # False=Point / True=Seg
+    item = False  # False=Point / True=Seg  or  False=handle / True=fix
 
     update(screen, data, mode, item, seg_proche)
     pygame.display.update()
@@ -46,11 +46,10 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
             if event.type == pygame.KEYDOWN:
                 mods = pygame.key.get_mods()
                 if event.key == pygame.K_p:
-                    print(data.points, end="\n\n")
-                    print(data.seg)
+                    print(item)
                 if event.key == pygame.K_n:
                     data.day = (data.day + 1) % 2
-                if (event.key == pygame.K_UP or event.key == pygame.K_DOWN) and mode > 1:
+                if (event.key == pygame.K_UP or event.key == pygame.K_DOWN) and mode != 1:
                     item = not item
                 if (event.key == pygame.K_DELETE or event.key == pygame.K_BACKSPACE) and mode == 2:
                     if not item:  # Point
@@ -66,9 +65,19 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                         data.save_points.pop(-1)
                 if event.key == pygame.K_a:
                     if mods & pygame.KMOD_CTRL and mods & pygame.KMOD_SHIFT:
-                        data.liste_cercles = []
+                        if item:
+                            data.fixes = []
+                        else:
+                            data.handles = []
                     elif mods & pygame.KMOD_CTRL:
-                        data.liste_cercles = list(data.points.keys())
+                        if item:
+                            for key in data.points.key():
+                                if key not in data.handles:
+                                    data.fixes.append(key)
+                        else:
+                            for key in data.points.key():
+                                if key not in data.fixes:
+                                    data.handles.append(key)
                 if event.key == pygame.K_r and mods & pygame.KMOD_CTRL:
                     data.WIDTH, data.HEIGHT = screen.get_size()
                     data.reset()
@@ -104,12 +113,13 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                     if mode != 2:
                         seg_proche = None
                     if mode == 2 and item:
-                        data.liste_cercles = []
+                        data.handles = []
+                        data.fixes = []
                         seg_proche = nearest_seg(data.points, data.seg, pos)
                         update(screen, data, mode, item, seg_proche)
                     elif mode == 3:  # Ajout
                         if item:  # Segment
-                            data.liste_cercles = [find_nearest(data.points, pos)]
+                            data.handles = [find_nearest(data.points, pos)]
                         else:  # Point
                             data.indice_point +=1
                             data.points[data.indice_point] = [pos[0], pos[1]]
@@ -126,8 +136,8 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                             mode = 2  # mode suppression
                         else:
                             mode = 3  # mode ajout
-                        data.liste_cercles = []
-                    elif mode > 1 and data.WIDTH*0.45 - data.HEIGHT*0.04 - data.HEIGHT*0.015/2 <= pos[0] <= data.WIDTH*0.45 - data.HEIGHT*0.04 + data.HEIGHT*0.015/2:  # Red Button Suppr
+                        data.handles = []
+                    elif mode != 1 and data.WIDTH*0.45 - data.HEIGHT*0.04 - data.HEIGHT*0.015/2 <= pos[0] <= data.WIDTH*0.45 - data.HEIGHT*0.04 + data.HEIGHT*0.015/2:  # Red Button Suppr
                         if not item:  # Point
                             data.suppression()
                         else:  # Segment
@@ -147,17 +157,30 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
             if event.type == pygame.MOUSEBUTTONUP:
                 pos2 = pygame.mouse.get_pos()
                 if mouse_down and (mode % 2) == 0 and not item:
-                    data.liste_cercles = select(data.points, pos, pos2)
+                    l = select(data.points, pos, pos2)
+                    for i in range(len(l)):
+                        if l[i] in data.fixes:
+                            l.pop(i)
+                    data.handles = l
+                if mouse_down and mode == 0 and item:  # Warning to not select points that are already selected in the other list or you will select nothing
+                    l = select(data.points, pos, pos2)
+                    for i in range(len(l)):
+                        if l[i] in data.handles:
+                            l.pop(i)
+                    data.fixes = l
                 elif mouse_down and mode == 3 and item:
                     nearest = find_nearest(data.points, pos2)
-                    if [data.liste_cercles[0], nearest] not in data.seg.values() and data.liste_cercles[0] != nearest:
+                    if [data.handles[0], nearest] not in data.seg.values() and data.handles[0] != nearest:
                         data.indice_seg +=1
-                        data.seg[data.indice_seg] = [data.liste_cercles[0], nearest]
-                    data.liste_cercles = []
+                        data.seg[data.indice_seg] = [data.handles[0], nearest]
+                    data.handles = []
                 elif mouse_down and mode == 1:
-                    if len(data.liste_cercles) > 0:
-                        handles = deepcopy(data.liste_cercles)
-                        handles.append(find_farest(data.points, data.liste_cercles))
+                    if len(data.handles) > 0:
+                        handles = deepcopy(data.handles)
+                        if len(data.fixes) == 0:
+                            handles.append(find_farest(data.points, data.handles))
+                        else:
+                            handles += deepcopy(data.fixes)
                         old_coords = list()
                         for k in handles:
                             old_coords.append(data.points[k])
@@ -183,13 +206,13 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
         if mousedrag and mode == 3 and item:
             update(screen , data, mode, item, seg_proche)
             nearest = find_nearest(data.points, actu_pos)
-            pygame.draw.line(screen, color=DARK_GREEN, start_pos=data.points[data.liste_cercles[0]], end_pos=actu_pos, width=2)
-            pygame.draw.circle(screen, color=GREEN, center=data.points[data.liste_cercles[0]], radius=max(min(4, min(data.WIDTH, data.HEIGHT) * 0.009), 1.75))
+            pygame.draw.line(screen, color=DARK_GREEN, start_pos=data.points[data.handles[0]], end_pos=actu_pos, width=2)
+            pygame.draw.circle(screen, color=GREEN, center=data.points[data.handles[0]], radius=max(min(4, min(data.WIDTH, data.HEIGHT) * 0.009), 1.75))
             pygame.draw.circle(screen, color=GREEN, center=data.points[nearest], radius=max(min(4, min(data.WIDTH, data.HEIGHT) * 0.009), 1.75))
         
         """Mooving Points"""
         if mousedrag and mode == 1:
-            move(data.points, data.liste_cercles, last_pos, actu_pos)
+            move(data.points, data.handles, last_pos, actu_pos)
             update(screen, data, mode, item, seg_proche)
             last_pos = actu_pos
         

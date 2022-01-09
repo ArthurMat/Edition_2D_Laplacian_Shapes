@@ -17,15 +17,15 @@ def find_nearest(points, pos):
             dist_min = dist
     return neighbor
 
-def find_farest(points, liste_cercles):
+def find_farest(points, handles):
     neighbor = None
     dist_max = None
     xg, yg = 0, 0
-    for key in liste_cercles:
+    for key in handles:
         xg += points[key][0]
         yg += points[key][1]
-    xg /= len(liste_cercles)
-    yg /= len(liste_cercles)
+    xg /= len(handles)
+    yg /= len(handles)
     for key, value in points.items():
         dist = distance(value, [xg, yg])
         if dist_max == None or dist_max < dist:

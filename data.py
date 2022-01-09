@@ -17,7 +17,8 @@ class Data:
         self.points, self.seg = array_to_dict(arr1), array_to_dict(arr2)
         self.seg = dico_cleaner(self.seg)
         self.copy_points = deepcopy(self.points)
-        self.liste_cercles = []
+        self.handles = []
+        self.fixes = []
         self.save_points = []
         self.day = 0
         self.indice_point = len(self.points.keys())
@@ -34,8 +35,8 @@ class Data:
 
     def suppression(self):
         cles_s = []
-        self.liste_cercles.sort(reverse = True)
-        for k in self.liste_cercles:
+        self.handles.sort(reverse = True)
+        for k in self.handles:
             self.points.pop(k)
             for key, val in self.seg.items():
                 if k in val and key not in cles_s:
@@ -43,7 +44,7 @@ class Data:
         cles_s.sort(reverse = True)
         for k in cles_s:
             self.seg.pop(k)
-        self.liste_cercles = []
+        self.handles = []
     
     def suppr_seg(self, seg_proche):
         self.seg.pop(seg_proche)
@@ -63,7 +64,8 @@ class Data:
         self.points, self.seg = array_to_dict(arr1), array_to_dict(arr2)
         self.seg = dico_cleaner(self.seg)
         self.copy_points = deepcopy(self.points)
-        self.liste_cercles = []
+        self.handles = []
+        self.fixes = []
         self.save_points = []
         self.transform()
         self.redim()
