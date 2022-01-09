@@ -137,6 +137,7 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                         else:
                             mode = 3  # mode ajout
                         data.handles = []
+                        data.fixes = []
                     elif mode != 1 and data.WIDTH*0.45 - data.HEIGHT*0.04 - data.HEIGHT*0.015/2 <= pos[0] <= data.WIDTH*0.45 - data.HEIGHT*0.04 + data.HEIGHT*0.015/2:  # Red Button Suppr
                         if not item:  # Point
                             data.suppression()
