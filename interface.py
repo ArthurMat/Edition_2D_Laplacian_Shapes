@@ -138,17 +138,15 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                             mode = 3  # mode ajout
                         data.handles = []
                         data.fixes = []
-                    elif mode != 1 and data.WIDTH*0.45 - data.HEIGHT*0.04 - data.HEIGHT*0.015/2 <= pos[0] <= data.WIDTH*0.45 - data.HEIGHT*0.04 + data.HEIGHT*0.015/2:  # Red Button Suppr
+                    elif mode > 1 and data.WIDTH*0.45 - data.HEIGHT*0.04 - data.HEIGHT*0.015/2 <= pos[0] <= data.WIDTH*0.45 - data.HEIGHT*0.04 + data.HEIGHT*0.015/2:  # Red Button Suppr
                         if not item:  # Point
                             data.suppression()
                         else:  # Segment
                             data.suppr_seg(seg_proche)
                             seg_proche = None
                         data.update_keys()
-                    elif mode > 1 and data.WIDTH*0.45 + data.HEIGHT*0.11 <= pos[0] <= data.WIDTH*0.45 + data.HEIGHT*0.14:  # Gray Selector Point/Segment
+                    elif mode != 1 and data.WIDTH*0.45 + data.HEIGHT*0.11 <= pos[0] <= data.WIDTH*0.45 + data.HEIGHT*0.14:  # Gray Selector Point/Segment
                         item = not item
-                    # elif data.WIDTH*0.75 - data.HEIGHT*0.02 <= pos[0] <= data.WIDTH*0.75 + data.HEIGHT*0.02 or data.WIDTH*0.75 + data.HEIGHT*0.04 <= pos[0] <= data.WIDTH*0.75 + data.HEIGHT*0.08:  # Orange Buttons Mesh
-                    #     data.switch()
                     elif data.WIDTH*0.95 - data.HEIGHT*0.012 <= pos[0] <= data.WIDTH*0.95 + data.HEIGHT*0.012:  # Red Button Reset
                         data.WIDTH, data.HEIGHT = screen.get_size()
                         data.reset()
