@@ -70,11 +70,11 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                             data.handles = []
                     elif mods & pygame.KMOD_CTRL:
                         if item:
-                            for key in data.points.key():
+                            for key in data.points.keys():
                                 if key not in data.handles:
                                     data.fixes.append(key)
                         else:
-                            for key in data.points.key():
+                            for key in data.points.keys():
                                 if key not in data.fixes:
                                     data.handles.append(key)
                 if event.key == pygame.K_r and mods & pygame.KMOD_CTRL:
@@ -155,15 +155,23 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                 pos2 = pygame.mouse.get_pos()
                 if mouse_down and (mode % 2) == 0 and not item:
                     l = select(data.points, pos, pos2)
+                    pop_liste = []
                     for i in range(len(l)):
                         if l[i] in data.fixes:
-                            l.pop(i)
+                            pop_liste.append(i)
+                    pop_liste.sort(reverse=True)
+                    for i in pop_liste:
+                        l.pop(i)
                     data.handles = l
                 if mouse_down and mode == 0 and item:  # Warning to not select points that are already selected in the other list or you will select nothing
                     l = select(data.points, pos, pos2)
+                    pop_liste = []
                     for i in range(len(l)):
                         if l[i] in data.handles:
-                            l.pop(i)
+                            pop_liste.append(i)
+                    pop_liste.sort(reverse=True)
+                    for i in pop_liste:
+                        l.pop(i)
                     data.fixes = l
                 elif mouse_down and mode == 3 and item:
                     nearest = find_nearest(data.points, pos2)
