@@ -52,12 +52,12 @@ class Data:
     def update_keys(self):
         self.indice_point = len(self.points.keys()) + 1
         self.indice_seg = len(self.seg.keys()) + 1
-        k1 = range(1, self.indice_point)
-        k2 = range(1, self.indice_seg)
-        dic1 = dict((key, value) for (key, value) in zip(k1, self.points))
-        dic2 = dict((key, value) for (key, value) in zip(k2, self.seg))
-        self.points = deepcopy(dic1)
-        self.seg = deepcopy(dic2)
+        # k1 = range(1, self.indice_point)
+        # k2 = range(1, self.indice_seg)
+        # dic1 = dict((key, value) for (key, value) in zip(k1, self.points))
+        # dic2 = dict((key, value) for (key, value) in zip(k2, self.seg))
+        # self.points = deepcopy(dic1)
+        # self.seg = deepcopy(dic2)
     
     def reset(self):
         arr1, arr2 = get_datas(self.filename[:-5])
