@@ -46,7 +46,7 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
             if event.type == pygame.KEYDOWN:
                 mods = pygame.key.get_mods()
                 if event.key == pygame.K_p:
-                    print(item)
+                    data.update_keys()
                 if event.key == pygame.K_n:
                     data.day = (data.day + 1) % 2
                 if (event.key == pygame.K_UP or event.key == pygame.K_DOWN) and mode != 1:
@@ -57,7 +57,6 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                     else:  # Segment
                         data.suppr_seg(seg_proche)
                         seg_proche = None
-                    data.update_keys()
                 if event.key == pygame.K_z and mods & pygame.KMOD_CTRL:
                     if len(data.save_points) > 0:
                         data.points = deepcopy(data.save_points[-1][0])
@@ -144,7 +143,6 @@ def main_interface(data, WIDTH=750, HEIGHT=750):
                         else:  # Segment
                             data.suppr_seg(seg_proche)
                             seg_proche = None
-                        data.update_keys()
                     elif mode != 1 and data.WIDTH*0.45 + data.HEIGHT*0.11 <= pos[0] <= data.WIDTH*0.45 + data.HEIGHT*0.14:  # Gray Selector Point/Segment
                         item = not item
                     elif data.WIDTH*0.95 - data.HEIGHT*0.012 <= pos[0] <= data.WIDTH*0.95 + data.HEIGHT*0.012:  # Red Button Reset
